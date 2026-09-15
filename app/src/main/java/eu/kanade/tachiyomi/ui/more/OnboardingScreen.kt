@@ -10,7 +10,9 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import eu.kanade.presentation.more.onboarding.OnboardingScreen
 import eu.kanade.presentation.more.settings.screen.SearchableSettings
 import eu.kanade.presentation.more.settings.screen.SettingsDataScreen
+import kotlinx.coroutines.launch
 import eu.kanade.presentation.util.Screen
+import androidx.compose.runtime.rememberCoroutineScope
 import eu.kanade.tachiyomi.ui.browse.BrowseTab
 import eu.kanade.tachiyomi.ui.home.HomeScreen
 import eu.kanade.tachiyomi.ui.setting.SettingsScreen
@@ -48,10 +50,13 @@ class OnboardingScreen : Screen() {
             },
             onNavigateToExtensions = {
                 finishOnboarding()
-                navigator.popUntilRoot()
-                val homeScreen = navigator.lastItem
-                if (homeScreen is HomeScreen) {
-                    homeScreen.openTab(HomeScreen.Tab.Browse(toExtensions = true))
+                val scope = rememberCoroutineScope()
+                scope.launch {
+                    navigator.popUntilRoot()
+                    val homeScreen = navigator.lastItem
+                    if (homeScreen is HomeScreen) {
+                        homeScreen.openTab(HomeScreen.Tab.Browse(toExtensions = true))
+                    }
                 }
             },
         )
