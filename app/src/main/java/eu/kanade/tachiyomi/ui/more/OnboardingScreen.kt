@@ -50,6 +50,14 @@ class OnboardingScreen : Screen() {
             },
             onNavigateToExtensions = {
                 finishOnboarding()
+                val scope = rememberCoroutineScope()
+                scope.launch {
+                    navigator.popUntilRoot()
+                    val homeScreen = navigator.lastItem
+                    if (homeScreen is HomeScreen) {
+                        homeScreen.openTab(HomeScreen.Tab.Browse(toExtensions = true))
+                    }
+                }
             },
         )
     }
