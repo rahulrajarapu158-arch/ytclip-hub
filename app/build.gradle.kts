@@ -10,7 +10,6 @@ import kotlin.io.encoding.Base64
 plugins {
     alias(mihonx.plugins.android.application)
     alias(mihonx.plugins.compose)
-    alias(mihonx.plugins.spotless)
 
     alias(libs.plugins.metro)
     alias(libs.plugins.aboutLibraries)
@@ -31,10 +30,10 @@ android {
     namespace = "eu.kanade.tachiyomi"
 
     defaultConfig {
-        applicationId = "app.mihon"
+        applicationId = "in.rahul.ytclip.hub"
 
-        versionCode = 30
-        versionName = "0.20.4"
+        versionCode = 1
+        versionName = "1.0.0"
 
         buildConfigField("String", "COMMIT_COUNT", "\"${getLatestCommitCount()}\"")
         buildConfigField("String", "COMMIT_SHA", "\"${getLatestCommitSha()}\"")
