@@ -34,7 +34,7 @@ class MangaUpdates(id: Long) : BaseTracker(id, "MangaUpdates"), DeletableTracker
         private const val SEARCH_ID_PREFIX = "id:"
     }
 
-    private val interceptor by lazy { MangaUpdatesInterceptor(this) }
+    private val interceptor by lazy { MangaUpdatesInterceptor() }
 
     private val api by lazy { MangaUpdatesApi(client, interceptor) }
 
