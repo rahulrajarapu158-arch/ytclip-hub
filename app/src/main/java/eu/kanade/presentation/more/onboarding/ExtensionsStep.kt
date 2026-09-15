@@ -36,11 +36,6 @@ internal class ExtensionsStep(
             url = "https://raw.githubusercontent.com/keiyoushi/extensions/repo",
             description = "All-in-one source for manga, manhwa, and novels",
         ),
-        ExtensionRecommendation(
-            name = "Keiyoushi v2 (Latest)",
-            url = "https://raw.githubusercontent.com/keiyoushi/extensions-source/repo",
-            description = "Latest extension repository with faster updates",
-        ),
     )
 
     @Composable
