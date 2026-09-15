@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.data.track.mangaupdates
 import eu.kanade.tachiyomi.BuildConfig
 import okhttp3.Interceptor
 import okhttp3.Response
-import java.io.IOException
 
 class MangaUpdatesInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
@@ -14,5 +13,9 @@ class MangaUpdatesInterceptor : Interceptor {
             .build()
 
         return chain.proceed(authRequest)
+    }
+
+    fun newAuth(token: String?) {
+        // No-op for ytclip
     }
 }
