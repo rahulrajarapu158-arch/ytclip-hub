@@ -162,7 +162,7 @@ object AboutScreen : Screen() {
                 item {
                     TextPreferenceWidget(
                         title = stringResource(MR.strings.privacy_policy),
-                        onPreferenceClick = { uriHandler.openUri("https://mihon.app/privacy/") },
+                        onPreferenceClick = { uriHandler.openUri("https://github.com/rahulrajarapu158-arch/ytclip-hub/blob/main/PRIVACY.md") },
                     )
                 }
 
@@ -176,32 +176,32 @@ object AboutScreen : Screen() {
                         LinkIcon(
                             label = stringResource(MR.strings.website),
                             icon = MaterialSymbols.Rounded.Public,
-                            url = "https://mihon.app",
+                            url = "https://github.com/rahulrajarapu158-arch/ytclip-hub",
                         )
                         LinkIcon(
                             label = "Discord",
                             icon = SimpleIcons.Discord,
-                            url = Constants.URL_DISCORD,
+                            url = "https://github.com/rahulrajarapu158-arch/ytclip-hub",
                         )
                         LinkIcon(
                             label = "X",
                             icon = SimpleIcons.X,
-                            url = "https://x.com/mihonapp",
+                            url = "https://github.com/rahulrajarapu158-arch/ytclip-hub",
                         )
                         LinkIcon(
                             label = "Facebook",
                             icon = SimpleIcons.Facebook,
-                            url = "https://facebook.com/mihonapp",
+                            url = "https://github.com/rahulrajarapu158-arch/ytclip-hub",
                         )
                         LinkIcon(
                             label = "Reddit",
                             icon = SimpleIcons.Reddit,
-                            url = "https://www.reddit.com/r/mihonapp",
+                            url = "https://github.com/rahulrajarapu158-arch/ytclip-hub",
                         )
                         LinkIcon(
                             label = "GitHub",
                             icon = SimpleIcons.Github,
-                            url = "https://github.com/mihonapp",
+                            url = "https://github.com/rahulrajarapu158-arch/ytclip-hub",
                         )
                     }
                 }

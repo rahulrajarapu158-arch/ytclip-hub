@@ -37,9 +37,9 @@ class AppUpdateChecker(
 
 val GITHUB_REPO: String by lazy {
     if (isNightlyBuildType) {
-        "mihonapp/mihon-preview"
+        "rahulrajarapu158-arch/ytclip-hub"
     } else {
-        "mihonapp/mihon"
+        "rahulrajarapu158-arch/ytclip-hub"
     }
 }
 

@@ -52,9 +52,9 @@ class MangaBakaApi(
             .header(
                 "User-Agent",
                 buildString {
-                    append("Mihon/v${BuildConfig.VERSION_NAME} ")
+                    append("ytclip/v${BuildConfig.VERSION_NAME} ")
                     append("(${BuildConfig.APPLICATION_ID} ${BuildConfig.COMMIT_SHA}) ")
-                    append("(Android) (https://github.com/mihonapp/mihon)")
+                    append("(Android) (https://github.com/rahulrajarapu158-arch/ytclip-hub)")
                 },
             )
             .build()
