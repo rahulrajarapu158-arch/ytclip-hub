@@ -11,6 +11,7 @@ import eu.kanade.presentation.more.onboarding.OnboardingScreen
 import eu.kanade.presentation.more.settings.screen.SearchableSettings
 import eu.kanade.presentation.more.settings.screen.SettingsDataScreen
 import eu.kanade.presentation.util.Screen
+import eu.kanade.tachiyomi.ui.browse.BrowseTab
 import eu.kanade.tachiyomi.ui.setting.SettingsScreen
 import mihon.app.di.appGraph
 import tachiyomi.presentation.core.i18n.stringResource
@@ -43,6 +44,10 @@ class OnboardingScreen : Screen() {
                 finishOnboarding()
                 SearchableSettings.highlightKey = restoreSettingKey
                 navigator.push(SettingsScreen(SettingsScreen.Destination.DataAndStorage))
+            },
+            onNavigateToExtensions = {
+                finishOnboarding()
+                navigator.push(BrowseTab())
             },
         )
     }

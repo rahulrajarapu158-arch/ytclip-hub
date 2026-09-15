@@ -1099,4 +1099,11 @@
     <string name="donationCampaign.paragraph3">Regardless, ytclip will continue to be maintained by me and the volunteers, and it will stay open source.</string>
     <string name="donationCampaign.contactPlatform">Discord</string>
     <string name="donationCampaign.dismiss">Dismiss</string>
+
+    <!-- Extensions onboarding -->
+    <string name="onboarding_extensions_title">Add Extensions</string>
+    <string name="onboarding_extensions_description">ytclip needs extensions to work. Add an extension store to get started.</string>
+    <string name="onboarding_extensions_store_title">Recommended Extension Stores</string>
+    <string name="onboarding_extensions_store_description">Copy the link below and paste it in the Extensions tab</string>
+    <string name="onboarding_extensions_button">Go to Extensions</string>
 </resources>
