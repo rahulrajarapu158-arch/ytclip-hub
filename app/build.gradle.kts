@@ -30,7 +30,7 @@ android {
         buildConfigField("String", "COMMIT_COUNT", "\"${getLatestCommitCount()}\"")
         buildConfigField("String", "COMMIT_SHA", "\"${getLatestCommitSha()}\"")
         buildConfigField("String", "BUILD_TIME", "\"${getBuildTime(useLatestCommitTime = false)}\"")
-        buildConfigField("boolean", "UPDATER_ENABLED", "${Config.enableUpdater}")
+        buildConfigField("boolean", "UPDATER_ENABLED", "false")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -154,8 +154,8 @@ android {
     }
 
     dependenciesInfo {
-        includeInApk = Config.includeDependencyInfo
-        includeInBundle = Config.includeDependencyInfo
+        includeInApk = false
+        includeInBundle = false
     }
 
     buildFeatures {
