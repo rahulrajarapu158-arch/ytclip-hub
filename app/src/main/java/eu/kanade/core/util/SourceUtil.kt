@@ -9,5 +9,6 @@ import uy.kohesive.injekt.api.get
 
 @Composable
 fun ifSourcesLoaded(): Boolean {
-    return remember { Injekt.get<SourceManager>().isInitialized }.collectAsState().value
+    val sourceManager: SourceManager = Injekt.get()
+    return remember { sourceManager.isInitialized }.collectAsState().value
 }
