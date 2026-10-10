@@ -205,7 +205,6 @@
     <string name="file_select_backup">Pilih berkas cadangan</string>
     <string name="update_check_confirm">Unduh</string>
     <string name="update_check_no_new_updates">Pembaruan tidak tersedia</string>
-    <string name="update_check_notification_download_in_progress">Mengunduh…</string>
     <string name="update_check_notification_update_available">Versi baru tersedia!</string>
     <string name="information_no_downloads">Tidak ada unduhan</string>
     <string name="information_no_recent">Tidak ada pembaruan terkini</string>
@@ -238,17 +237,14 @@
     <string name="ext_untrusted">Tidak terpercaya</string>
     <string name="ext_uninstall">Lepas</string>
     <string name="untrusted_extension">Ekstensi tidak terpercaya</string>
-    <string name="untrusted_extension_message">Ekstensi berbahaya dapat membaca semua kredensial login yang disimpan atau menjalankan kode berbahaya.
-\n
-\nDengan mempercayai sertifikat ekstensi ini, Anda menerima risiko ini.</string>
+    <string name="untrusted_extension_message">Ekstensi berbahaya dapat membaca semua kredensial login yang disimpan atau menjalankan kode berbahaya. \n \nDengan mempercayai sertifikat ekstensi ini, Anda menerima risiko ini.</string>
     <string name="pref_double_tap_anim_speed">Kecepatan animasi ketukan dua kali</string>
     <string name="double_tap_anim_speed_0">Tanpa animasi</string>
     <string name="double_tap_anim_speed_normal">Normal</string>
     <string name="double_tap_anim_speed_fast">Cepat</string>
     <string name="manga_added_library">Ditambahkan ke pustaka</string>
     <string name="manga_removed_library">Dihapus dari pustaka</string>
-    <string name="copied_to_clipboard">Tersalin ke papan klip:
-\n%1$s</string>
+    <string name="copied_to_clipboard">Tersalin ke papan klip: \n%1$s</string>
     <string name="migration_dialog_what_to_include">Pilih data yang ikut dipindah</string>
     <string name="migrate">Pindah</string>
     <string name="copy">Salin</string>
@@ -540,7 +536,6 @@
     <string name="action_display_language_badge">Bahasa</string>
     <string name="update_72hour">Tiap 3 hari</string>
     <string name="connected_to_wifi">Hanya pada Wi-FI</string>
-    <string name="channel_app_updates">Pembaruan aplikasi</string>
     <string name="ext_update_all">Perbarui semuanya</string>
     <string name="pref_auto_clear_chapter_cache">Bersihkan cache bab saat aplikasi dibuka</string>
     <string name="database_clean">Tidak ada yang perlu dibersihkan</string>
@@ -639,8 +634,7 @@
     <string name="action_open_random_manga">Buka entri acak</string>
     <string name="download_notifier_cache_renewal">Memeriksa unduhan</string>
     <string name="information_no_entries_found">Tidak ada entri yang ditemukan dalam kategori ini</string>
-    <string name="fdroid_warning">Build F-Droid tidak didukung secara resmi.
-\n Ketuk untuk mempelajari lebih lanjut.</string>
+    <string name="fdroid_warning">Build F-Droid tidak didukung secara resmi. \n Ketuk untuk mempelajari lebih lanjut.</string>
     <string name="action_display_show_continue_reading_button">Tombol lanjutkan membaca</string>
     <string name="track_remove_date_conf_title">Hapus tanggal?</string>
     <string name="pref_invalidate_download_cache">Mengindeks ulang unduhan</string>
@@ -754,11 +748,7 @@
     <string name="no_location_set">Lokasi penyimpanan belum ditentukan</string>
     <string name="onboarding_permission_notifications_description">Dapatkan notifikasi untuk pembaruan pustaka dan sebagainya.</string>
     <string name="onboarding_permission_action_grant">Izinkan</string>
-    <string name="onboarding_storage_info">Pilih direktori untuk menyimpan konten dari %1$s, termasuk unduhan chapter, data backup, dan lainnya.
-\n
-\nSebaiknya menggunakan direktori terpisah.
-\n
-\nDirektori yang dipilih: %2$s</string>
+    <string name="onboarding_storage_info">Pilih direktori untuk menyimpan konten dari %1$s, termasuk unduhan chapter, data backup, dan lainnya. \n \nSebaiknya menggunakan direktori terpisah. \n \nDirektori yang dipilih: %2$s</string>
     <string name="onboarding_storage_help_action">Panduan penyimpanan</string>
     <string name="pref_library_update_smart_update">Pembauan pintar</string>
     <string name="onboarding_storage_help_info">Memperbarui dari versi lama dan tak yakin harus pilih mana? lihat panduan penyimpanan untuk informasi lebih lanjut.</string>
@@ -808,13 +798,8 @@
     <string name="ext_confirm_remove">Hapus Ekstensi?</string>
     <string name="pref_auto_update_manga_on_mark_read">Kemajuan pembaruan saat ditandai sebagai telah dibaca</string>
     <string name="trackers_updated_summary">Pelacak diperbarui ke bab %d</string>
-    <string name="pref_hardware_bitmap_threshold">Batas bitmap perangkat keras kustom</string>
-    <string name="pref_hardware_bitmap_threshold_summary">Jika pembaca memuat gambar kosong, kurangi threshold secara bertahap.\nPilih: %s</string>
-    <string name="pref_hardware_bitmap_threshold_default">Bawaan (%d)</string>
-    <string name="pref_always_decode_long_strip_with_ssiv_summary">Mempengaruhi performa. Aktifkan hanya jika menurunkan batas bitmap tidak memperbaiki gambar kosong</string>
     <string name="pref_incognito_mode_extension_summary">Jeda riwayat pembacaan untuk ekstensi</string>
     <string name="label_auto">Otomatis</string>
-    <string name="pref_always_decode_long_strip_with_ssiv_2">Gunakan dekoder lama untuk bacaan strip panjang</string>
     <string name="pref_mark_duplicate_read_chapter_read">Tandai bab duplikat sebagai sudah dibaca</string>
     <string name="theme_monochrome">Monokrom</string>
     <string name="export">Ekspor</string>

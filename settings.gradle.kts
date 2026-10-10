@@ -28,18 +28,19 @@ dependencyResolutionManagement {
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
-rootProject.name = "ytclip-hub"
+rootProject.name = "ytclip"
 include(":app")
 include(":baseline-profile")
 include(":core-metadata")
 include(":core:archive")
 include(":core:common")
-include(":core:viewmodel")
+include(":core:metro")
 include(":data")
 include(":domain")
 include(":i18n")
+include(":icons:material-symbols")
+include(":icons:simple-icons")
 include(":presentation-core")
 include(":presentation-widget")
 include(":source-api")
 include(":source-local")
-include(":telemetry")

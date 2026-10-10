@@ -61,9 +61,7 @@
     <string name="ext_untrusted">Nedůvěryhodné</string>
     <string name="ext_uninstall">Odinstalovat</string>
     <string name="untrusted_extension">Nedůvěryhodné rozšíření</string>
-    <string name="untrusted_extension_message">Škodlivé rozšíření může přečíst jakékoliv uložené přihlašovací údaje nebo spustit libovolný kód.
-\n
-\nDůvěřováním tohoto rozšířeni přijímáte tato rizika.</string>
+    <string name="untrusted_extension_message">Škodlivé rozšíření může přečíst jakékoliv uložené přihlašovací údaje nebo spustit libovolný kód. \n \nDůvěřováním tohoto rozšířeni přijímáte tato rizika.</string>
     <string name="pref_fullscreen">Celá obrazovka</string>
     <string name="pref_page_transitions">Animovat přechody stránek</string>
     <string name="pref_show_page_number">Zobrazit číslo stránky</string>
@@ -226,8 +224,7 @@
     <string name="browse">Procházet</string>
     <string name="unknown">Neznámý</string>
     <string name="licensed">Licencovaný</string>
-    <string name="copied_to_clipboard">Zkopírováno do schránky:
-\n%1$s</string>
+    <string name="copied_to_clipboard">Zkopírováno do schránky: \n%1$s</string>
     <string name="sort_by_number">Podle čísla kapitoly</string>
     <string name="manga_tracking_tab">Sledování</string>
     <string name="dropped">Již nečtu</string>
@@ -261,7 +258,6 @@
     <string name="notification_cover_update_failed">Chyba při aktualizaci obalu</string>
     <string name="notification_first_add_to_library">Přidejte si prosím položku do knihovny před tím, než toto uděláte</string>
     <string name="file_select_cover">Vybrat obrázek obalu</string>
-    <string name="update_check_notification_download_in_progress">Probíhá stahování…</string>
     <string name="information_no_downloads">Žádné stahování</string>
     <string name="information_empty_library">Vaše knihovna je prázdná</string>
     <string name="information_empty_category">Nemáte žádné kategorie. Klikněte na tlačítko plus a vytvořte nějakou pro zorganizování vaší knihovny.</string>
@@ -540,7 +536,6 @@
     <string name="download_queue_size_warning">Varování: hromadné stahování může vést k tomu, že zdroje zpomalí a/nebo zablokují %s. Klepnutím se dozvíte více.</string>
     <string name="ext_update_all">Aktualizovat vše</string>
     <string name="pref_verbose_logging_summary">Vypisovat podrobné informace do systémového protokolu (sníží výkon aplikace)</string>
-    <string name="channel_app_updates">Aktualizace aplikace</string>
     <string name="notification_size_warning">Varování: velké aktualizace poškozují zdroje a můžou vést k pomalejším aktualizacím a zvýšenému využití baterie. Klepnutím se dozvíte více.</string>
     <string name="pref_auto_clear_chapter_cache">Vymazat mezipaměť kapitol při spuštění aplikace</string>
     <string name="extension_api_error">Chyba v získání seznamu rozšíření</string>
@@ -639,8 +634,7 @@
     <string name="download_notifier_cache_renewal">Kontrola stahování</string>
     <string name="information_no_entries_found">V této kategorii nebyly nalezeny žádné položky</string>
     <string name="action_open_random_manga">Otevřít náhodnou položku</string>
-    <string name="fdroid_warning">F-Droid sestavení nejsou oficiálně podporovány.
-\nKlepnutím zobrazíte další informace.</string>
+    <string name="fdroid_warning">F-Droid sestavení nejsou oficiálně podporovány. \nKlepnutím zobrazíte další informace.</string>
     <string name="action_display_show_continue_reading_button">Tlačítko Pokračovat ve čtení</string>
     <string name="track_remove_date_conf_title">Odstranit datum?</string>
     <string name="track_remove_finish_date_conf_text">Tím se odstraní dříve vybrané datum ukončení z %s</string>
@@ -757,11 +751,7 @@
     <string name="ext_permission_install_apps_warning">K instalaci rozšíření je nutné povolení. Klepněte zde pro udělení povolení.</string>
     <string name="private_settings">Zahrnout citlivé nastavení (např. přihlašovací tokeny sledovačů)</string>
     <string name="onboarding_permission_action_grant">Udělit</string>
-    <string name="onboarding_storage_info">Vyberte složku, kde %1$s bude ukládat stahování kapitol, zálohy a další.
-\n
-\nJe doporučena vyhrazená složka.
-\n
-\nVybraná složka: %2$s</string>
+    <string name="onboarding_storage_info">Vyberte složku, kde %1$s bude ukládat stahování kapitol, zálohy a další. \n \nJe doporučena vyhrazená složka. \n \nVybraná složka: %2$s</string>
     <string name="invalid_backup_file_error">Úplná chyba:</string>
     <string name="pref_library_update_smart_update">Chytrá aktualizace</string>
     <string name="manga_interval_expected_update">Předpoklad vydání nových kapitol za zhruba %1$s, kontrola co %2$s.</string>
@@ -795,17 +785,13 @@
     <string name="pref_firebase">Analytika a záznamy o pádech</string>
     <string name="firebase_summary">Odesílání záznamů o pádech a analytických dat nám umožní identifikovat a opravit problémy, zlepšit výkon a přizpůsobit budoucí aktualizace vašim potřebám</string>
     <string name="onboarding_permission_analytics">Povolit analytiku</string>
-    <string name="pref_always_decode_long_strip_with_ssiv_summary">Má dopad na výkon. Povolte pouze pokud snížení limitu bitmapy nespraví problémy s prázdnými obrázky</string>
     <string name="ext_remove">Odstranit</string>
     <string name="ext_confirm_remove">Odstranit rozšíření?</string>
     <string name="remove_private_extension_message">Opravdu chcete odstranit rozšíření \"%s\"?</string>
     <string name="pref_download_new_unread_chapters_only">Přeskočit stahování duplicitních přečtených kapitol</string>
     <string name="invalid_backup_file_json">Záloha do JSONu není podporována</string>
     <string name="invalid_backup_file_unknown">Soubor se zálohou je poškozen</string>
-    <string name="pref_hardware_bitmap_threshold">Vlastní limit hardwarových bitmap</string>
-    <string name="pref_hardware_bitmap_threshold_default">Výchozí (%d)</string>
     <string name="onboarding_permission_crashlytics">Posílat chybová hlášení</string>
-    <string name="pref_hardware_bitmap_threshold_summary">Jestliže čtenář načte prázdnou stránku, postupně snižuj prahovou hodnotu.\nVybráno: %s</string>
     <string name="pref_incognito_mode_extension_summary">Pozastavit historii čtení pro rozšíření</string>
     <string name="trackers_updated_summary">Sledovače aktualizovány do kapitoly %d</string>
     <string name="non_library_settings">Všechny přečtené záznamy</string>
@@ -827,7 +813,6 @@
     <string name="pref_behavior">Chování</string>
     <string name="pref_mark_duplicate_read_chapter_read_existing">Po přečtení kapitoly</string>
     <string name="pref_mark_duplicate_read_chapter_read_new">Po získání nové kapitoly</string>
-    <string name="pref_always_decode_long_strip_with_ssiv_2">Použít zastaralý dekodér pro dlouhý pruh</string>
     <string name="pref_update_library_manga_titles">Aktualizovat názvy mangy z knihovny, aby odpovídaly zdroji</string>
     <string name="logging_in">Přihlašování…</string>
     <string name="notes_placeholder">Užil jsem si tu část kde…</string>

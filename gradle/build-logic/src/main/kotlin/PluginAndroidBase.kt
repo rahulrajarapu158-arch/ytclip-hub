@@ -8,6 +8,7 @@ import mihon.gradle.extensions.configureTest
 import mihon.gradle.extensions.coreLibraryDesugaring
 import mihon.gradle.extensions.libs
 import mihon.gradle.extensions.mihonx
+import mihon.gradle.extensions.release
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.dependencies
@@ -25,10 +26,12 @@ class PluginAndroidBase : Plugin<Project> {
                     targetSdk = mihonx.versions.android.sdk.target.get().toInt()
                 }
 
-                // ndkVersion = mihonx.versions.android.ndk.get()
+                ndkVersion = mihonx.versions.android.ndk.get()
             }
 
-            compileSdk = mihonx.versions.android.sdk.compile.get().toInt()
+            compileSdk {
+                version = release(mihonx.versions.android.sdk.compile)
+            }
 
             compileOptions {
                 isCoreLibraryDesugaringEnabled = true
