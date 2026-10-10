@@ -1,5 +1,10 @@
 package eu.kanade.presentation.manga.components
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.FilterList
+import androidx.compose.material.icons.outlined.FlipToBack
+import androidx.compose.material.icons.outlined.SelectAll
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.surfaceColorAtElevation
@@ -16,11 +21,6 @@ import eu.kanade.presentation.components.AppBarActions
 import eu.kanade.presentation.components.AppBarTitle
 import eu.kanade.presentation.components.DownloadDropdownMenu
 import eu.kanade.presentation.manga.DownloadAction
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.Download
-import mihon.icons.materialsymbols.rounded.FilterList
-import mihon.icons.materialsymbols.rounded.FlipToBack
-import mihon.icons.materialsymbols.rounded.SelectAll
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.theme.active
@@ -80,14 +80,14 @@ fun MangaToolbar(
                         add(
                             AppBar.Action(
                                 title = stringResource(MR.strings.action_select_all),
-                                icon = MaterialSymbols.Rounded.SelectAll,
+                                icon = Icons.Outlined.SelectAll,
                                 onClick = onSelectAll,
                             ),
                         )
                         add(
                             AppBar.Action(
                                 title = stringResource(MR.strings.action_select_inverse),
-                                icon = MaterialSymbols.Rounded.FlipToBack,
+                                icon = Icons.Outlined.FlipToBack,
                                 onClick = onInvertSelection,
                             ),
                         )
@@ -97,7 +97,7 @@ fun MangaToolbar(
                         add(
                             AppBar.Action(
                                 title = stringResource(MR.strings.manga_download),
-                                icon = MaterialSymbols.Rounded.Download,
+                                icon = Icons.Outlined.Download,
                                 onClick = { downloadExpanded = !downloadExpanded },
                             ),
                         )
@@ -105,7 +105,7 @@ fun MangaToolbar(
                     add(
                         AppBar.Action(
                             title = stringResource(MR.strings.action_filter),
-                            icon = MaterialSymbols.Rounded.FilterList,
+                            icon = Icons.Outlined.FilterList,
                             iconTint = filterTint,
                             onClick = onClickFilter,
                         ),

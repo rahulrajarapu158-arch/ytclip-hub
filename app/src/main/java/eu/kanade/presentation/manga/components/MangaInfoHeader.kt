@@ -25,6 +25,22 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Brush
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.HourglassEmpty
+import androidx.compose.material.icons.filled.PersonOutline
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.outlined.AttachMoney
+import androidx.compose.material.icons.outlined.Block
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Done
+import androidx.compose.material.icons.outlined.DoneAll
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Pause
+import androidx.compose.material.icons.outlined.Public
+import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material.icons.outlined.Sync
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -70,29 +86,13 @@ import coil3.request.crossfade
 import com.mikepenz.markdown.model.markdownAnnotator
 import com.mikepenz.markdown.model.markdownAnnotatorConfig
 import com.mikepenz.markdown.utils.getUnescapedTextInNode
+import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.presentation.components.DropdownMenu
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.util.system.copyToClipboard
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
-import mihon.app.di.appGraph
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.AttachMoney
-import mihon.icons.materialsymbols.rounded.Block
-import mihon.icons.materialsymbols.rounded.Brush
-import mihon.icons.materialsymbols.rounded.Close
-import mihon.icons.materialsymbols.rounded.Done
-import mihon.icons.materialsymbols.rounded.DoneAll
-import mihon.icons.materialsymbols.rounded.Favorite
-import mihon.icons.materialsymbols.rounded.HourglassEmpty
-import mihon.icons.materialsymbols.rounded.Pause
-import mihon.icons.materialsymbols.rounded.Person
-import mihon.icons.materialsymbols.rounded.Public
-import mihon.icons.materialsymbols.rounded.Schedule
-import mihon.icons.materialsymbols.rounded.Sync
-import mihon.icons.materialsymbols.rounded.Warning
-import mihon.icons.materialsymbols.roundedfilled.Favorite
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.findChildOfType
@@ -105,6 +105,8 @@ import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.clickableNoIndication
 import tachiyomi.presentation.core.util.secondaryItemAlpha
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import kotlin.math.roundToInt
 import kotlin.time.Clock
 import kotlin.time.Instant
@@ -203,7 +205,7 @@ fun MangaActionRow(
             } else {
                 stringResource(MR.strings.add_to_library)
             },
-            icon = if (favorite) MaterialSymbols.RoundedFilled.Favorite else MaterialSymbols.Rounded.Favorite,
+            icon = if (favorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
             color = if (favorite) MaterialTheme.colorScheme.primary else defaultActionButtonColor,
             onClick = onAddToLibraryClicked,
             onLongClick = onEditCategory,
@@ -218,7 +220,7 @@ fun MangaActionRow(
                     nextUpdateDays,
                 )
             },
-            icon = MaterialSymbols.Rounded.HourglassEmpty,
+            icon = Icons.Default.HourglassEmpty,
             color = if (isUserIntervalMode) MaterialTheme.colorScheme.primary else defaultActionButtonColor,
             onClick = { onEditIntervalClicked?.invoke() },
         )
@@ -228,14 +230,14 @@ fun MangaActionRow(
             } else {
                 pluralStringResource(MR.plurals.num_trackers, count = trackingCount, trackingCount)
             },
-            icon = if (trackingCount == 0) MaterialSymbols.Rounded.Sync else MaterialSymbols.Rounded.Done,
+            icon = if (trackingCount == 0) Icons.Outlined.Sync else Icons.Outlined.Done,
             color = if (trackingCount == 0) defaultActionButtonColor else MaterialTheme.colorScheme.primary,
             onClick = onTrackingClicked,
         )
         if (onWebViewClicked != null) {
             MangaActionButton(
                 title = stringResource(MR.strings.action_web_view),
-                icon = MaterialSymbols.Rounded.Public,
+                icon = Icons.Outlined.Public,
                 color = defaultActionButtonColor,
                 onClick = onWebViewClicked,
                 onLongClick = onWebViewLongClicked,
@@ -458,7 +460,7 @@ private fun ColumnScope.MangaContentInfo(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            imageVector = MaterialSymbols.Rounded.Person,
+            imageVector = Icons.Filled.PersonOutline,
             contentDescription = null,
             modifier = Modifier.size(16.dp),
         )
@@ -489,7 +491,7 @@ private fun ColumnScope.MangaContentInfo(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                imageVector = MaterialSymbols.Rounded.Brush,
+                imageVector = Icons.Filled.Brush,
                 contentDescription = null,
                 modifier = Modifier.size(16.dp),
             )
@@ -514,13 +516,13 @@ private fun ColumnScope.MangaContentInfo(
     ) {
         Icon(
             imageVector = when (status) {
-                SManga.ONGOING.toLong() -> MaterialSymbols.Rounded.Schedule
-                SManga.COMPLETED.toLong() -> MaterialSymbols.Rounded.DoneAll
-                SManga.LICENSED.toLong() -> MaterialSymbols.Rounded.AttachMoney
-                SManga.PUBLISHING_FINISHED.toLong() -> MaterialSymbols.Rounded.Done
-                SManga.CANCELLED.toLong() -> MaterialSymbols.Rounded.Close
-                SManga.ON_HIATUS.toLong() -> MaterialSymbols.Rounded.Pause
-                else -> MaterialSymbols.Rounded.Block
+                SManga.ONGOING.toLong() -> Icons.Outlined.Schedule
+                SManga.COMPLETED.toLong() -> Icons.Outlined.DoneAll
+                SManga.LICENSED.toLong() -> Icons.Outlined.AttachMoney
+                SManga.PUBLISHING_FINISHED.toLong() -> Icons.Outlined.Done
+                SManga.CANCELLED.toLong() -> Icons.Outlined.Close
+                SManga.ON_HIATUS.toLong() -> Icons.Outlined.Pause
+                else -> Icons.Outlined.Block
             },
             contentDescription = null,
             modifier = Modifier
@@ -544,7 +546,7 @@ private fun ColumnScope.MangaContentInfo(
             DotSeparatorText()
             if (isStubSource) {
                 Icon(
-                    imageVector = MaterialSymbols.Rounded.Warning,
+                    imageVector = Icons.Filled.Warning,
                     contentDescription = null,
                     modifier = Modifier
                         .padding(end = 4.dp)
@@ -617,8 +619,7 @@ private fun MangaSummary(
     onEditNotesClicked: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-    val preferences = remember { context.appGraph.uiPreferences }
+    val preferences = remember { Injekt.get<UiPreferences>() }
     val loadImages = remember { preferences.imagesInDescription.get() }
     val animProgress by animateFloatAsState(
         targetValue = if (expanded) 1f else 0f,

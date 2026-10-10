@@ -7,6 +7,8 @@ import android.os.Build
 import android.view.View
 import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.domain.ui.model.TabletUiMode
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 private const val TABLET_UI_REQUIRED_SCREEN_WIDTH_DP = 720
 
@@ -21,9 +23,9 @@ fun Configuration.isTabletUi(): Boolean {
 }
 
 // TODO: move the logic to `isTabletUi()` when main activity is rewritten in Compose
-fun Context.prepareTabletUiContext(uiPreferences: UiPreferences): Context {
+fun Context.prepareTabletUiContext(): Context {
     val configuration = resources.configuration
-    val expected = when (uiPreferences.tabletUiMode.get()) {
+    val expected = when (Injekt.get<UiPreferences>().tabletUiMode.get()) {
         TabletUiMode.AUTOMATIC ->
             configuration.smallestScreenWidthDp >= when (configuration.orientation) {
                 Configuration.ORIENTATION_PORTRAIT -> TABLET_UI_MIN_SCREEN_WIDTH_PORTRAIT_DP

@@ -1,6 +1,5 @@
 package tachiyomi.domain.history.interactor
 
-import dev.zacsweers.metro.Inject
 import tachiyomi.domain.chapter.interactor.GetChaptersByMangaId
 import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.chapter.service.getChapterSort
@@ -8,7 +7,6 @@ import tachiyomi.domain.history.repository.HistoryRepository
 import tachiyomi.domain.manga.interactor.GetManga
 import kotlin.math.max
 
-@Inject
 class GetNextChapters(
     private val getChaptersByMangaId: GetChaptersByMangaId,
     private val getManga: GetManga,

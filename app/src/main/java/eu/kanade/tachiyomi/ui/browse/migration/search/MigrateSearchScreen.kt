@@ -3,9 +3,10 @@ package eu.kanade.tachiyomi.ui.browse.migration.search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import dev.zacsweers.metrox.viewmodel.assistedMetroViewModel
 import eu.kanade.presentation.browse.MigrateSearchScreen
 import eu.kanade.presentation.util.Screen
 import eu.kanade.tachiyomi.ui.browse.source.globalsearch.SearchViewModel
@@ -19,8 +20,12 @@ class MigrateSearchScreen(private val mangaId: Long) : Screen() {
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
 
-        val viewModel =
-            assistedMetroViewModel<MigrateSearchViewModel, MigrateSearchViewModel.Factory> { create(mangaId = mangaId) }
+        val viewModel = viewModel<MigrateSearchViewModel>(
+            factory = MigrateSearchViewModel.Factory,
+            extras = CreationExtras {
+                set(MigrateSearchViewModel.MANGA_ID_KEY, mangaId)
+            },
+        )
         val state by viewModel.state.collectAsState()
 
         MigrateSearchScreen(

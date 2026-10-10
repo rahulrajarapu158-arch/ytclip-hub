@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -26,16 +28,14 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.more.settings.widget.TextPreferenceWidget
 import eu.kanade.presentation.util.Screen
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.automirroredrounded.OpenInNew
-import mihon.icons.simpleicons.Discord
-import mihon.icons.simpleicons.OpenCollective
-import mihon.icons.simpleicons.Patreon
-import mihon.icons.simpleicons.SimpleIcons
 import tachiyomi.core.common.Constants
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.icons.CustomIcons
+import tachiyomi.presentation.core.icons.Discord
+import tachiyomi.presentation.core.icons.OpenCollective
+import tachiyomi.presentation.core.icons.Patreon
 
 class SupportUsScreen : Screen() {
 
@@ -87,12 +87,12 @@ class SupportUsScreen : Screen() {
                 )
 
                 SupportItem(
-                    icon = SimpleIcons.Patreon,
+                    icon = CustomIcons.Patreon,
                     title = stringResource(MR.strings.supportUsScreen_donationPlatform_patreon),
                     onClick = { uriHandler.openUri(Constants.URL_DONATE_PATREON) },
                 )
                 SupportItem(
-                    icon = SimpleIcons.OpenCollective,
+                    icon = CustomIcons.OpenCollective,
                     title = stringResource(MR.strings.supportUsScreen_donationPlatform_opencollective),
                     onClick = { uriHandler.openUri(Constants.URL_DONATE_OPENCOLLECTIVE) },
                 )
@@ -110,7 +110,7 @@ class SupportUsScreen : Screen() {
                 )
 
                 SupportItem(
-                    icon = SimpleIcons.Discord,
+                    icon = CustomIcons.Discord,
                     title = stringResource(MR.strings.supportUsScreen_contactPlatform),
                     onClick = { uriHandler.openUri(Constants.URL_DISCORD) },
                 )
@@ -132,7 +132,7 @@ class SupportUsScreen : Screen() {
                 icon = icon,
                 widget = {
                     Icon(
-                        imageVector = MaterialSymbols.AutoMirroredRounded.OpenInNew,
+                        imageVector = Icons.AutoMirrored.Filled.OpenInNew,
                         contentDescription = null,
                     )
                 },

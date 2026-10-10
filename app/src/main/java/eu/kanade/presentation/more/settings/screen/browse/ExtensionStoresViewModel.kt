@@ -1,53 +1,53 @@
 package eu.kanade.presentation.more.settings.screen.browse
 
 import androidx.compose.runtime.Immutable
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.zacsweers.metro.AppScope
-import dev.zacsweers.metro.ContributesIntoMap
-import dev.zacsweers.metro.Inject
-import dev.zacsweers.metro.binding
-import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import eu.kanade.tachiyomi.extension.ExtensionManager
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.WhileSubscribed
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import mihon.core.viewmodel.StateViewModel
 import mihon.domain.extension.interactor.AddExtensionStore
 import mihon.domain.extension.interactor.GetExtensionStores
 import mihon.domain.extension.interactor.RemoveExtensionStore
 import mihon.domain.extension.interactor.UpdateExtensionStores
 import mihon.domain.extension.model.ExtensionStore
 import tachiyomi.core.common.util.lang.launchIO
-import kotlin.time.Duration.Companion.seconds
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
-@Inject
-@ViewModelKey
-@ContributesIntoMap(AppScope::class, binding = binding<ViewModel>())
 class ExtensionStoresViewModel(
-    private val getExtensionStores: GetExtensionStores,
-    private val addExtensionStore: AddExtensionStore,
-    private val removeExtensionStore: RemoveExtensionStore,
-    private val updateExtensionStores: UpdateExtensionStores,
-    private val extensionManager: ExtensionManager,
-) : ViewModel() {
+    private val getExtensionStores: GetExtensionStores = Injekt.get(),
+    private val addExtensionStore: AddExtensionStore = Injekt.get(),
+    private val removeExtensionStore: RemoveExtensionStore = Injekt.get(),
+    private val updateExtensionStores: UpdateExtensionStores = Injekt.get(),
+    private val extensionManager: ExtensionManager = Injekt.get(),
+) : StateViewModel<ExtensionStoreScreenState>(ExtensionStoreScreenState.Loading) {
 
-    private val dialog = MutableStateFlow<ExtensionStoreDialog?>(null)
-
-    val state: StateFlow<ExtensionStoreScreenState> = combine(
-        getExtensionStores.subscribe(),
-        dialog,
-    ) { stores, dialog ->
-        ExtensionStoreScreenState.Success(stores = stores, dialog = dialog)
+    private inline fun updateSuccessState(
+        func: (ExtensionStoreScreenState.Success) -> ExtensionStoreScreenState.Success,
+    ) {
+        mutableState.update {
+            when (it) {
+                ExtensionStoreScreenState.Loading -> it
+                is ExtensionStoreScreenState.Success -> func(it)
+            }
+        }
     }
-        .flowOn(Dispatchers.IO)
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), ExtensionStoreScreenState.Loading)
+
+    init {
+        viewModelScope.launchIO {
+            getExtensionStores.subscribe()
+                .collectLatest { stores ->
+                    mutableState.update {
+                        when (it) {
+                            ExtensionStoreScreenState.Loading -> ExtensionStoreScreenState.Success(stores = stores)
+                            is ExtensionStoreScreenState.Success -> it.copy(stores = stores)
+                        }
+                    }
+                }
+        }
+    }
 
     /**
      * Creates and adds a new repo to the database.
@@ -56,12 +56,14 @@ class ExtensionStoresViewModel(
      */
     fun createRepo(baseUrl: String) {
         viewModelScope.launch {
-            dialog.update {
-                when (it) {
-                    is ExtensionStoreDialog.Create -> it.copy(processing = true)
-                    is ExtensionStoreDialog.Confirm -> it.copy(processing = true)
-                    else -> it
-                }
+            updateSuccessState {
+                it.copy(
+                    dialog = when (it.dialog) {
+                        is ExtensionStoreDialog.Create -> it.dialog.copy(processing = true)
+                        is ExtensionStoreDialog.Confirm -> it.dialog.copy(processing = true)
+                        else -> it.dialog
+                    },
+                )
             }
             addExtensionStore(baseUrl)
                 .onSuccess {
@@ -69,18 +71,20 @@ class ExtensionStoresViewModel(
                     dismissDialog()
                 }
                 .onFailure { throwable ->
-                    dialog.update {
-                        when (it) {
-                            is ExtensionStoreDialog.Create -> it.copy(
-                                processing = false,
-                                errorMessage = throwable.message ?: "unknown error",
-                            )
-                            is ExtensionStoreDialog.Confirm -> it.copy(
-                                processing = false,
-                                errorMessage = throwable.message ?: "unknown error",
-                            )
-                            else -> it
-                        }
+                    updateSuccessState {
+                        it.copy(
+                            dialog = when (it.dialog) {
+                                is ExtensionStoreDialog.Create -> it.dialog.copy(
+                                    processing = false,
+                                    errorMessage = throwable.message ?: "unknown error",
+                                )
+                                is ExtensionStoreDialog.Confirm -> it.dialog.copy(
+                                    processing = false,
+                                    errorMessage = throwable.message ?: "unknown error",
+                                )
+                                else -> it.dialog
+                            },
+                        )
                     }
                 }
         }
@@ -90,8 +94,12 @@ class ExtensionStoresViewModel(
      * Refreshes information for each repository.
      */
     fun refreshRepos() {
-        viewModelScope.launchIO {
-            updateExtensionStores()
+        val status = state.value
+
+        if (status is ExtensionStoreScreenState.Success) {
+            viewModelScope.launchIO {
+                updateExtensionStores()
+            }
         }
     }
 
@@ -106,18 +114,26 @@ class ExtensionStoresViewModel(
     }
 
     fun addFromDeeplink(storeIndexUrl: String) {
-        viewModelScope.launchIO {
-            val alreadyExists = getExtensionStores.get().any { it.indexUrl == storeIndexUrl }
-            dialog.update { ExtensionStoreDialog.Confirm(url = storeIndexUrl, alreadyExists = alreadyExists) }
+        updateSuccessState { state ->
+            state.copy(
+                dialog = ExtensionStoreDialog.Confirm(
+                    url = storeIndexUrl,
+                    alreadyExists = state.stores.any { it.indexUrl == storeIndexUrl },
+                ),
+            )
         }
     }
 
     fun showDialog(dialog: ExtensionStoreDialog) {
-        this.dialog.update { dialog }
+        updateSuccessState { state ->
+            state.copy(dialog = dialog)
+        }
     }
 
     fun dismissDialog() {
-        dialog.update { null }
+        updateSuccessState {
+            it.copy(dialog = null)
+        }
     }
 }
 

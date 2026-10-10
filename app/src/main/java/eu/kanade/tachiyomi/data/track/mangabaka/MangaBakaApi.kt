@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.core.net.toUri
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.track.TrackerManager
 import eu.kanade.tachiyomi.data.track.mangabaka.dto.MangaBakaItem
 import eu.kanade.tachiyomi.data.track.mangabaka.dto.MangaBakaItemResult
 import eu.kanade.tachiyomi.data.track.mangabaka.dto.MangaBakaListResult
@@ -21,9 +22,6 @@ import eu.kanade.tachiyomi.network.awaitSuccess
 import eu.kanade.tachiyomi.network.parseAs
 import eu.kanade.tachiyomi.util.PkceUtil
 import eu.kanade.tachiyomi.util.lang.toLocalDate
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.atStartOfDayIn
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -37,10 +35,11 @@ import java.math.RoundingMode
 import java.security.SecureRandom
 import java.util.Base64
 import java.util.Locale
+import kotlin.time.Instant
 import tachiyomi.domain.track.model.Track as DomainTrack
 
 class MangaBakaApi(
-    private val trackerId: Long,
+    private val trackId: Long,
     baseClient: OkHttpClient,
     interceptor: MangaBakaInterceptor,
 ) {
@@ -52,9 +51,9 @@ class MangaBakaApi(
             .header(
                 "User-Agent",
                 buildString {
-                    append("ytclip/v${BuildConfig.VERSION_NAME} ")
+                    append("Mihon/v${BuildConfig.VERSION_NAME} ")
                     append("(${BuildConfig.APPLICATION_ID} ${BuildConfig.COMMIT_SHA}) ")
-                    append("(Android) (https://github.com/rahulrajarapu158-arch/ytclip-hub)")
+                    append("(Android) (https://github.com/mihonapp/mihon)")
                 },
             )
             .build()
@@ -119,13 +118,14 @@ class MangaBakaApi(
                         .parseAs<MangaBakaItemResult>()
                         .data
 
-                    Track.create(trackerId).apply {
+                    Track.create(TrackerManager.MANGABAKA).apply {
                         remote_id = track.remote_id
                         title = additionalData.chooseBestTitle()
                         status = userData.getStatus()
                         score = userData.rating?.toDouble() ?: 0.0
-                        started_reading_date = parseIsoDateAsLocalStartOfDay(userData.startDate) ?: 0
-                        finished_reading_date = parseIsoDateAsLocalStartOfDay(userData.finishDate) ?: 0
+                        started_reading_date = userData.startDate?.let { Instant.parse(it).toEpochMilliseconds() } ?: 0
+                        finished_reading_date =
+                            userData.finishDate?.let { Instant.parse(it).toEpochMilliseconds() } ?: 0
                         last_chapter_read = userData.progressChapter ?: 0.0
                         private = userData.isPrivate
                     }
@@ -195,7 +195,7 @@ class MangaBakaApi(
     }
 
     private fun parseSearchItem(item: MangaBakaItem): TrackSearch {
-        return TrackSearch.create(trackerId).apply {
+        return TrackSearch.create(trackId).apply {
             remote_id = item.id
             title = item.chooseBestTitle()
             summary = item.description?.trim().orEmpty()
@@ -265,16 +265,6 @@ class MangaBakaApi(
     }
 
     fun verifyOAuthState(state: String): Boolean = state == oauthStateParam
-
-    private fun parseIsoDateAsLocalStartOfDay(isoDate: String?): Long? {
-        // The v1 API returns full ISO 8601 strings with a midnight-UTC-truncated time component, regardless of the
-        // actual time of the change made.
-        return isoDate
-            ?.substringBefore("T")
-            ?.let { LocalDate.parse(it) }
-            ?.atStartOfDayIn(TimeZone.currentSystemDefault())
-            ?.toEpochMilliseconds()
-    }
 
     companion object {
         private const val CLIENT_ID = "zEZYMHXLWsLsafgbvJHXqzGvqQNOdkpo"

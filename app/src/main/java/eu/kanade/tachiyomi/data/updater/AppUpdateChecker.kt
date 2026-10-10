@@ -1,16 +1,15 @@
 package eu.kanade.tachiyomi.data.updater
 
-import dev.zacsweers.metro.Inject
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.util.system.isFossBuildType
-import eu.kanade.tachiyomi.util.system.isNightlyBuildType
+import eu.kanade.tachiyomi.util.system.isPreviewBuildType
 import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.domain.release.interactor.GetApplicationRelease
+import uy.kohesive.injekt.injectLazy
 
-@Inject
-class AppUpdateChecker(
-    private val getApplicationRelease: GetApplicationRelease,
-) {
+class AppUpdateChecker {
+
+    private val getApplicationRelease: GetApplicationRelease by injectLazy()
 
     suspend fun checkForUpdate(forceCheck: Boolean = false): GetApplicationRelease.Result {
         // Disable app update checks for older Android versions that we're going to drop support for
@@ -22,7 +21,7 @@ class AppUpdateChecker(
             val result = getApplicationRelease.await(
                 GetApplicationRelease.Arguments(
                     isFossBuildType,
-                    isNightlyBuildType,
+                    isPreviewBuildType,
                     BuildConfig.COMMIT_COUNT.toInt(),
                     BuildConfig.VERSION_NAME,
                     GITHUB_REPO,
@@ -36,15 +35,15 @@ class AppUpdateChecker(
 }
 
 val GITHUB_REPO: String by lazy {
-    if (isNightlyBuildType) {
-        "rahulrajarapu158-arch/ytclip-hub"
+    if (isPreviewBuildType) {
+        "mihonapp/mihon-preview"
     } else {
-        "rahulrajarapu158-arch/ytclip-hub"
+        "mihonapp/mihon"
     }
 }
 
 val RELEASE_TAG: String by lazy {
-    if (isNightlyBuildType) {
+    if (isPreviewBuildType) {
         "r${BuildConfig.COMMIT_COUNT}"
     } else {
         "v${BuildConfig.VERSION_NAME}"

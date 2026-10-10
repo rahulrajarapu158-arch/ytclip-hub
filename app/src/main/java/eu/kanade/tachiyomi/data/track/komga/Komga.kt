@@ -21,11 +21,10 @@ class Komga(id: Long) : BaseTracker(id, "Komga"), EnhancedTracker {
         const val COMPLETED = 3L
     }
 
-    override val client: OkHttpClient by lazy {
+    override val client: OkHttpClient =
         networkService.client.newBuilder()
             .dns(Dns.SYSTEM) // don't use DNS over HTTPS as it breaks IP addressing
             .build()
-    }
 
     val api by lazy { KomgaApi(id, client) }
 
@@ -94,7 +93,7 @@ class Komga(id: Long) : BaseTracker(id, "Komga"), EnhancedTracker {
     override suspend fun match(manga: Manga): TrackSearch? =
         try {
             api.getTrackSearch(manga.url)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
             null
         }
 

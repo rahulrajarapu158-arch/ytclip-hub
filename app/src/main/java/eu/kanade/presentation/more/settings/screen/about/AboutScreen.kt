@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,27 +30,19 @@ import eu.kanade.presentation.more.settings.widget.TextPreferenceWidget
 import eu.kanade.presentation.util.LocalBackPress
 import eu.kanade.presentation.util.Screen
 import eu.kanade.tachiyomi.BuildConfig
+import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
 import eu.kanade.tachiyomi.data.updater.RELEASE_URL
 import eu.kanade.tachiyomi.ui.more.NewUpdateScreen
+import eu.kanade.tachiyomi.util.CrashLogUtil
 import eu.kanade.tachiyomi.util.lang.toDateTimestampString
 import eu.kanade.tachiyomi.util.system.copyToClipboard
-import eu.kanade.tachiyomi.util.system.isFossBuildType
-import eu.kanade.tachiyomi.util.system.isNightlyBuildType
+import eu.kanade.tachiyomi.util.system.isPreviewBuildType
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.updaterEnabled
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import logcat.LogPriority
-import mihon.app.di.appGraph
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.Public
-import mihon.icons.simpleicons.Discord
-import mihon.icons.simpleicons.Facebook
-import mihon.icons.simpleicons.Github
-import mihon.icons.simpleicons.Reddit
-import mihon.icons.simpleicons.SimpleIcons
-import mihon.icons.simpleicons.X
 import tachiyomi.core.common.Constants
 import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.core.common.util.lang.withUIContext
@@ -59,6 +53,12 @@ import tachiyomi.presentation.core.components.LinkIcon
 import tachiyomi.presentation.core.components.ScrollbarLazyColumn
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.icons.CustomIcons
+import tachiyomi.presentation.core.icons.Discord
+import tachiyomi.presentation.core.icons.Facebook
+import tachiyomi.presentation.core.icons.Github
+import tachiyomi.presentation.core.icons.Reddit
+import tachiyomi.presentation.core.icons.X
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import kotlin.time.Instant
@@ -73,7 +73,6 @@ object AboutScreen : Screen() {
         val handleBack = LocalBackPress.current
         val navigator = LocalNavigator.currentOrThrow
         var isCheckingUpdates by remember { mutableStateOf(false) }
-        val crashLogUtil = remember { context.appGraph.crashLogUtil }
 
         Scaffold(
             topBar = { scrollBehavior ->
@@ -98,7 +97,7 @@ object AboutScreen : Screen() {
                         title = stringResource(MR.strings.version),
                         subtitle = getVersionName(withBuildDate = true),
                         onPreferenceClick = {
-                            val deviceInfo = crashLogUtil.getDebugInfo()
+                            val deviceInfo = CrashLogUtil(context).getDebugInfo()
                             context.copyToClipboard("Debug information", deviceInfo)
                         },
                     )
@@ -162,7 +161,7 @@ object AboutScreen : Screen() {
                 item {
                     TextPreferenceWidget(
                         title = stringResource(MR.strings.privacy_policy),
-                        onPreferenceClick = { uriHandler.openUri("https://github.com/rahulrajarapu158-arch/ytclip-hub/blob/main/PRIVACY.md") },
+                        onPreferenceClick = { uriHandler.openUri("https://mihon.app/privacy/") },
                     )
                 }
 
@@ -175,33 +174,33 @@ object AboutScreen : Screen() {
                     ) {
                         LinkIcon(
                             label = stringResource(MR.strings.website),
-                            icon = MaterialSymbols.Rounded.Public,
-                            url = "https://github.com/rahulrajarapu158-arch/ytclip-hub",
+                            icon = Icons.Outlined.Public,
+                            url = "https://mihon.app",
                         )
                         LinkIcon(
                             label = "Discord",
-                            icon = SimpleIcons.Discord,
-                            url = "https://github.com/rahulrajarapu158-arch/ytclip-hub",
+                            icon = CustomIcons.Discord,
+                            url = Constants.URL_DISCORD,
                         )
                         LinkIcon(
                             label = "X",
-                            icon = SimpleIcons.X,
-                            url = "https://github.com/rahulrajarapu158-arch/ytclip-hub",
+                            icon = CustomIcons.X,
+                            url = "https://x.com/mihonapp",
                         )
                         LinkIcon(
                             label = "Facebook",
-                            icon = SimpleIcons.Facebook,
-                            url = "https://github.com/rahulrajarapu158-arch/ytclip-hub",
+                            icon = CustomIcons.Facebook,
+                            url = "https://facebook.com/mihonapp",
                         )
                         LinkIcon(
                             label = "Reddit",
-                            icon = SimpleIcons.Reddit,
-                            url = "https://github.com/rahulrajarapu158-arch/ytclip-hub",
+                            icon = CustomIcons.Reddit,
+                            url = "https://www.reddit.com/r/mihonapp",
                         )
                         LinkIcon(
                             label = "GitHub",
-                            icon = SimpleIcons.Github,
-                            url = "https://github.com/rahulrajarapu158-arch/ytclip-hub",
+                            icon = CustomIcons.Github,
+                            url = "https://github.com/mihonapp",
                         )
                     }
                 }
@@ -217,7 +216,7 @@ object AboutScreen : Screen() {
         onAvailableUpdate: (GetApplicationRelease.Result.NewUpdate) -> Unit,
         onFinish: () -> Unit,
     ) {
-        val updateChecker = context.appGraph.updateChecker
+        val updateChecker = AppUpdateChecker()
         withUIContext {
             try {
                 when (val result = withIOContext { updateChecker.checkForUpdate(forceCheck = true) }) {
@@ -251,8 +250,8 @@ object AboutScreen : Screen() {
                     }
                 }
             }
-            isNightlyBuildType -> {
-                "Nightly r${BuildConfig.COMMIT_COUNT}".let {
+            isPreviewBuildType -> {
+                "Beta r${BuildConfig.COMMIT_COUNT}".let {
                     if (withBuildDate) {
                         "$it (${BuildConfig.COMMIT_SHA}, ${getFormattedBuildTime()})"
                     } else {
@@ -261,8 +260,7 @@ object AboutScreen : Screen() {
                 }
             }
             else -> {
-                val channel = if (isFossBuildType) "FOSS" else "Stable"
-                "$channel v${BuildConfig.VERSION_NAME}".let {
+                "Stable ${BuildConfig.VERSION_NAME}".let {
                     if (withBuildDate) {
                         "$it (${getFormattedBuildTime()})"
                     } else {
@@ -279,7 +277,7 @@ object AboutScreen : Screen() {
                 .toLocalDateTime(TimeZone.currentSystemDefault())
                 .toDateTimestampString(
                     UiPreferences.dateFormat(
-                        Injekt.get<Context>().appGraph.uiPreferences.dateFormat.get(),
+                        Injekt.get<UiPreferences>().dateFormat.get(),
                     ),
                 )
         } catch (_: Exception) {

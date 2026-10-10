@@ -12,6 +12,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.FormatListBulleted
+import androidx.compose.material.icons.outlined.FormatBold
+import androidx.compose.material.icons.outlined.FormatItalic
+import androidx.compose.material.icons.outlined.FormatListNumbered
+import androidx.compose.material.icons.outlined.FormatUnderlined
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -44,12 +50,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.automirroredrounded.FormatListBulleted
-import mihon.icons.materialsymbols.rounded.FormatBold
-import mihon.icons.materialsymbols.rounded.FormatItalic
-import mihon.icons.materialsymbols.rounded.FormatListNumbered
-import mihon.icons.materialsymbols.rounded.FormatUnderlined
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
@@ -130,14 +130,14 @@ fun MangaNotesTextArea(
                     MangaNotesTextAreaButton(
                         onClick = { richTextState.toggleSpanStyle(SpanStyle(fontWeight = FontWeight.Bold)) },
                         isSelected = richTextState.currentSpanStyle.fontWeight == FontWeight.Bold,
-                        icon = MaterialSymbols.Rounded.FormatBold,
+                        icon = Icons.Outlined.FormatBold,
                     )
                 }
                 item {
                     MangaNotesTextAreaButton(
                         onClick = { richTextState.toggleSpanStyle(SpanStyle(fontStyle = FontStyle.Italic)) },
                         isSelected = richTextState.currentSpanStyle.fontStyle == FontStyle.Italic,
-                        icon = MaterialSymbols.Rounded.FormatItalic,
+                        icon = Icons.Outlined.FormatItalic,
                     )
                 }
                 item {
@@ -148,7 +148,7 @@ fun MangaNotesTextArea(
                         isSelected = richTextState.currentSpanStyle.textDecoration
                             ?.contains(TextDecoration.Underline)
                             ?: false,
-                        icon = MaterialSymbols.Rounded.FormatUnderlined,
+                        icon = Icons.Outlined.FormatUnderlined,
                     )
                 }
                 item {
@@ -162,14 +162,14 @@ fun MangaNotesTextArea(
                     MangaNotesTextAreaButton(
                         onClick = { richTextState.toggleUnorderedList() },
                         isSelected = richTextState.isUnorderedList,
-                        icon = MaterialSymbols.AutoMirroredRounded.FormatListBulleted,
+                        icon = Icons.AutoMirrored.Outlined.FormatListBulleted,
                     )
                 }
                 item {
                     MangaNotesTextAreaButton(
                         onClick = { richTextState.toggleOrderedList() },
                         isSelected = richTextState.isOrderedList,
-                        icon = MaterialSymbols.Rounded.FormatListNumbered,
+                        icon = Icons.Outlined.FormatListNumbered,
                     )
                 }
             }

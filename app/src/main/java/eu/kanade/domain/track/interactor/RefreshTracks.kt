@@ -1,6 +1,5 @@
 package eu.kanade.domain.track.interactor
 
-import dev.zacsweers.metro.Inject
 import eu.kanade.domain.track.model.toDbTrack
 import eu.kanade.domain.track.model.toDomainTrack
 import eu.kanade.tachiyomi.data.track.Tracker
@@ -11,7 +10,6 @@ import kotlinx.coroutines.supervisorScope
 import tachiyomi.domain.track.interactor.GetTracks
 import tachiyomi.domain.track.interactor.InsertTrack
 
-@Inject
 class RefreshTracks(
     private val getTracks: GetTracks,
     private val trackerManager: TrackerManager,

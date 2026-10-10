@@ -7,6 +7,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CollectionsBookmark
+import androidx.compose.material.icons.outlined.LocalLibrary
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -16,10 +20,6 @@ import eu.kanade.presentation.more.stats.components.StatsItem
 import eu.kanade.presentation.more.stats.components.StatsOverviewItem
 import eu.kanade.presentation.more.stats.data.StatsData
 import eu.kanade.presentation.util.toDurationString
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.CollectionsBookmark
-import mihon.icons.materialsymbols.rounded.LocalLibrary
-import mihon.icons.materialsymbols.rounded.Schedule
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.SectionCard
 import tachiyomi.presentation.core.components.material.padding
@@ -70,17 +70,17 @@ private fun LazyItemScope.OverviewSection(
             StatsOverviewItem(
                 title = data.libraryMangaCount.toString(),
                 subtitle = stringResource(MR.strings.in_library),
-                icon = MaterialSymbols.Rounded.CollectionsBookmark,
+                icon = Icons.Outlined.CollectionsBookmark,
             )
             StatsOverviewItem(
                 title = readDurationString,
                 subtitle = stringResource(MR.strings.label_read_duration),
-                icon = MaterialSymbols.Rounded.Schedule,
+                icon = Icons.Outlined.Schedule,
             )
             StatsOverviewItem(
                 title = data.completedMangaCount.toString(),
                 subtitle = stringResource(MR.strings.label_completed_titles),
-                icon = MaterialSymbols.Rounded.LocalLibrary,
+                icon = Icons.Outlined.LocalLibrary,
             )
         }
     }

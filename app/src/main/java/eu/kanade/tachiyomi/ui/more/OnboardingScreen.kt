@@ -4,30 +4,26 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.platform.LocalContext
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import eu.kanade.domain.base.BasePreferences
 import eu.kanade.presentation.more.onboarding.OnboardingScreen
 import eu.kanade.presentation.more.settings.screen.SearchableSettings
 import eu.kanade.presentation.more.settings.screen.SettingsDataScreen
 import eu.kanade.presentation.util.Screen
-import eu.kanade.tachiyomi.ui.browse.BrowseTab
-import eu.kanade.tachiyomi.ui.home.HomeScreen
 import eu.kanade.tachiyomi.ui.setting.SettingsScreen
-import kotlinx.coroutines.launch
-import mihon.app.di.appGraph
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 class OnboardingScreen : Screen() {
 
     @Composable
     override fun Content() {
-        val context = LocalContext.current
         val navigator = LocalNavigator.currentOrThrow
 
-        val basePreferences = remember { context.appGraph.basePreferences }
+        val basePreferences = remember { Injekt.get<BasePreferences>() }
         val shownOnboardingFlow by basePreferences.shownOnboardingFlow.collectAsState()
 
         val finishOnboarding: () -> Unit = {
@@ -41,24 +37,12 @@ class OnboardingScreen : Screen() {
             // Prevent exiting if onboarding hasn't been completed
         }
 
-        val scope = rememberCoroutineScope()
-
         OnboardingScreen(
             onComplete = finishOnboarding,
             onRestoreBackup = {
                 finishOnboarding()
                 SearchableSettings.highlightKey = restoreSettingKey
                 navigator.push(SettingsScreen(SettingsScreen.Destination.DataAndStorage))
-            },
-            onNavigateToExtensions = {
-                finishOnboarding()
-                scope.launch {
-                    navigator.popUntilRoot()
-                    val homeScreen = navigator.lastItem
-                    if (homeScreen is HomeScreen) {
-                        homeScreen.openTab(HomeScreen.Tab.Browse(toExtensions = true))
-                    }
-                }
             },
         )
     }

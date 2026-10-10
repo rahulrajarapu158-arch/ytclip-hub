@@ -22,6 +22,9 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.DropdownMenuItem
@@ -57,9 +60,6 @@ import eu.kanade.tachiyomi.util.lang.toJavaLocalDate
 import eu.kanade.tachiyomi.util.lang.toLocalDate
 import eu.kanade.tachiyomi.util.system.copyToClipboard
 import kotlinx.datetime.toJavaLocalDate
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.MoreVert
-import mihon.icons.materialsymbols.rounded.VisibilityOff
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import java.time.format.DateTimeFormatter
@@ -175,7 +175,7 @@ private fun TrackInfoItem(
                             modifier = Modifier.absoluteOffset(x = (-5).dp),
                         ) {
                             Icon(
-                                imageVector = MaterialSymbols.Rounded.VisibilityOff,
+                                imageVector = Icons.Filled.VisibilityOff,
                                 contentDescription = stringResource(MR.strings.tracked_privately),
                                 modifier = Modifier.size(14.dp),
                             )
@@ -334,7 +334,7 @@ private fun TrackInfoItemMenu(
     Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
         IconButton(onClick = { expanded = true }) {
             Icon(
-                imageVector = MaterialSymbols.Rounded.MoreVert,
+                imageVector = Icons.Default.MoreVert,
                 contentDescription = stringResource(MR.strings.label_more),
             )
         }

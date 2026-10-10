@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.data.track.anilist.dto
 
 import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.track.TrackerManager
 import eu.kanade.tachiyomi.data.track.anilist.Anilist
 import eu.kanade.tachiyomi.data.track.anilist.AnilistApi
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
@@ -20,7 +21,7 @@ data class ALManga(
     val averageScore: Int,
     val staff: ALStaff,
 ) {
-    fun toTrack(trackerId: Long) = TrackSearch.create(trackerId).apply {
+    fun toTrack() = TrackSearch.create(TrackerManager.ANILIST).apply {
         remote_id = remoteId
         title = this@ALManga.title
         total_chapters = totalChapters
@@ -56,7 +57,7 @@ data class ALUserManga(
     val manga: ALManga,
     val private: Boolean,
 ) {
-    fun toTrack(trackerId: Long) = Track.create(trackerId).apply {
+    fun toTrack() = Track.create(TrackerManager.ANILIST).apply {
         remote_id = manga.remoteId
         title = manga.title
         status = toTrackStatus()

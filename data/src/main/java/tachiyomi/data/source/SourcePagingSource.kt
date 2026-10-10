@@ -4,58 +4,51 @@ import androidx.paging.PagingState
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangasPage
-import kotlinx.coroutines.CancellationException
 import mihon.domain.manga.model.toDomainManga
 import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.domain.manga.interactor.NetworkToLocalManga
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.repository.SourcePagingSource
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 class SourceSearchPagingSource(
-    source: suspend () -> Source,
+    source: Source,
     private val query: String,
     private val filters: FilterList,
-    networkToLocalManga: NetworkToLocalManga,
-) : BaseSourcePagingSource(source, networkToLocalManga) {
-    override suspend fun requestNextPage(source: Source, currentPage: Int): MangasPage {
+) : BaseSourcePagingSource(source) {
+    override suspend fun requestNextPage(currentPage: Int): MangasPage {
         return source.getSearchManga(currentPage, query, filters)
     }
 }
 
-class SourcePopularPagingSource(
-    source: suspend () -> Source,
-    networkToLocalManga: NetworkToLocalManga,
-) : BaseSourcePagingSource(source, networkToLocalManga) {
-    override suspend fun requestNextPage(source: Source, currentPage: Int): MangasPage {
+class SourcePopularPagingSource(source: Source) : BaseSourcePagingSource(source) {
+    override suspend fun requestNextPage(currentPage: Int): MangasPage {
         return source.getPopularManga(currentPage)
     }
 }
 
-class SourceLatestPagingSource(
-    source: suspend () -> Source,
-    networkToLocalManga: NetworkToLocalManga,
-) : BaseSourcePagingSource(source, networkToLocalManga) {
-    override suspend fun requestNextPage(source: Source, currentPage: Int): MangasPage {
+class SourceLatestPagingSource(source: Source) : BaseSourcePagingSource(source) {
+    override suspend fun requestNextPage(currentPage: Int): MangasPage {
         return source.getLatestUpdates(currentPage)
     }
 }
 
 abstract class BaseSourcePagingSource(
-    private val source: suspend () -> Source,
-    private val networkToLocalManga: NetworkToLocalManga,
+    protected val source: Source,
+    private val networkToLocalManga: NetworkToLocalManga = Injekt.get(),
 ) : SourcePagingSource() {
 
     private val seenManga = hashSetOf<String>()
 
-    abstract suspend fun requestNextPage(source: Source, currentPage: Int): MangasPage
+    abstract suspend fun requestNextPage(currentPage: Int): MangasPage
 
     override suspend fun load(params: LoadParams<Long>): LoadResult<Long, Manga> {
         val page = params.key ?: 1
 
         return try {
-            val source = source()
             val mangasPage = withIOContext {
-                requestNextPage(source, page.toInt())
+                requestNextPage(page.toInt())
                     .takeIf { it.mangas.isNotEmpty() }
                     ?: throw NoResultsException()
             }
@@ -70,8 +63,6 @@ abstract class BaseSourcePagingSource(
                 prevKey = null,
                 nextKey = if (mangasPage.hasNextPage) page + 1 else null,
             )
-        } catch (e: CancellationException) {
-            throw e
         } catch (e: Exception) {
             LoadResult.Error(e)
         }

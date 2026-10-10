@@ -1,13 +1,9 @@
 package eu.kanade.tachiyomi.data.download
 
 import android.content.Context
-import dev.zacsweers.metro.AppScope
-import dev.zacsweers.metro.Inject
-import dev.zacsweers.metro.SingleIn
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.Page
-import eu.kanade.tachiyomi.source.online.HttpSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.drop
@@ -24,36 +20,40 @@ import tachiyomi.core.common.util.lang.launchIO
 import tachiyomi.core.common.util.system.ImageUtil
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.category.interactor.GetCategories
-import tachiyomi.domain.chapter.interactor.GetChapter
 import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.download.service.DownloadPreferences
-import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.i18n.MR
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 /**
  * This class is used to manage chapter downloads in the application. It must be instantiated once
  * and retrieved through dependency injection. You can use this class to queue new chapters or query
  * downloaded chapters.
  */
-@Inject
-@SingleIn(AppScope::class)
 class DownloadManager(
     private val context: Context,
-    private val provider: DownloadProvider,
-    private val cache: DownloadCache,
-    private val getCategories: GetCategories,
-    private val getManga: GetManga,
-    private val getChapter: GetChapter,
-    private val sourceManager: SourceManager,
-    private val downloadPreferences: DownloadPreferences,
-    private val downloader: Downloader,
-    private val pendingDeleter: DownloadPendingDeleter,
+    private val provider: DownloadProvider = Injekt.get(),
+    private val cache: DownloadCache = Injekt.get(),
+    private val getCategories: GetCategories = Injekt.get(),
+    private val sourceManager: SourceManager = Injekt.get(),
+    private val downloadPreferences: DownloadPreferences = Injekt.get(),
 ) {
+
+    /**
+     * Downloader whose only task is to download chapters.
+     */
+    private val downloader = Downloader(context, provider, cache)
 
     val isRunning: Boolean
         get() = downloader.isRunning
+
+    /**
+     * Queue to delay the deletion of a list of chapters until triggered.
+     */
+    private val pendingDeleter = DownloadPendingDeleter(context)
 
     val queueState
         get() = downloader.queueState
@@ -107,21 +107,13 @@ class DownloadManager(
     fun startDownloadNow(chapterId: Long) {
         val existingDownload = getQueuedDownloadOrNull(chapterId)
         // If not in queue try to start a new download
-        val toAdd = existingDownload ?: runBlocking { downloadFromChapterId(chapterId) } ?: return
+        val toAdd = existingDownload ?: runBlocking { Download.fromChapterId(chapterId) } ?: return
         queueState.value.toMutableList().apply {
             existingDownload?.let { remove(it) }
             add(0, toAdd)
             reorderQueue(this)
         }
         startDownloads()
-    }
-
-    private suspend fun downloadFromChapterId(chapterId: Long): Download? {
-        val chapter = getChapter.await(chapterId) ?: return null
-        val manga = getManga.await(chapter.mangaId) ?: return null
-        val source = sourceManager.get(manga.source) as? HttpSource ?: return null
-
-        return Download(source, manga, chapter)
     }
 
     /**
@@ -140,7 +132,7 @@ class DownloadManager(
      * @param chapters the list of chapters to enqueue.
      * @param autoStart whether to start the downloader after enqueing the chapters.
      */
-    suspend fun downloadChapters(manga: Manga, chapters: List<Chapter>, autoStart: Boolean = true) {
+    fun downloadChapters(manga: Manga, chapters: List<Chapter>, autoStart: Boolean = true) {
         downloader.queueChapters(manga, chapters, autoStart)
     }
 
@@ -188,6 +180,7 @@ class DownloadManager(
      * @param chapterScanlator scanlator of the chapter to query
      * @param mangaTitle the title of the manga to query.
      * @param sourceId the id of the source of the chapter.
+     * @param skipCache whether to skip the directory cache and check in the filesystem.
      */
     fun isChapterDownloaded(
         chapterName: String,
@@ -195,26 +188,9 @@ class DownloadManager(
         chapterUrl: String,
         mangaTitle: String,
         sourceId: Long,
+        skipCache: Boolean = false,
     ): Boolean {
-        return cache.isChapterDownloaded(chapterName, chapterScanlator, chapterUrl, mangaTitle, sourceId)
-    }
-
-    /**
-     * Returns true if the chapter is present on disk, bypassing the directory cache.
-     *
-     * @param chapterName the name of the chapter to query.
-     * @param chapterScanlator scanlator of the chapter to query
-     * @param mangaTitle the title of the manga to query.
-     * @param source the source of the chapter.
-     */
-    fun isChapterDownloadedOnDisk(
-        chapterName: String,
-        chapterScanlator: String?,
-        chapterUrl: String,
-        mangaTitle: String,
-        source: Source,
-    ): Boolean {
-        return provider.findChapterDir(chapterName, chapterScanlator, chapterUrl, mangaTitle, source) != null
+        return cache.isChapterDownloaded(chapterName, chapterScanlator, chapterUrl, mangaTitle, sourceId, skipCache)
     }
 
     /**
@@ -318,7 +294,7 @@ class DownloadManager(
     /**
      * Triggers the execution of the deletion of pending chapters.
      */
-    suspend fun deletePendingChapters() {
+    fun deletePendingChapters() {
         val pendingChapters = pendingDeleter.getPendingChapters()
         for ((manga, chapters) in pendingChapters) {
             val source = sourceManager.get(manga.source) ?: continue

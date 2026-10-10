@@ -3,12 +3,12 @@ package eu.kanade.tachiyomi.extension.util
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import dev.zacsweers.metro.Inject
 import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.extension.model.InstallStep
 import eu.kanade.tachiyomi.util.system.hasMiuiPackageInstaller
 import eu.kanade.tachiyomi.util.system.toast
-import mihon.app.di.appGraph
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -17,8 +17,6 @@ import kotlin.time.Duration.Companion.seconds
  */
 class ExtensionInstallActivity : Activity() {
 
-    @Inject private lateinit var extensionManager: ExtensionManager
-
     // MIUI package installer bug workaround
     private var ignoreUntil = 0L
     private var ignoreResult = false
@@ -26,7 +24,6 @@ class ExtensionInstallActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        appGraph.inject(this)
 
         @Suppress("DEPRECATION")
         val installIntent = Intent(Intent.ACTION_INSTALL_PACKAGE)
@@ -74,6 +71,7 @@ class ExtensionInstallActivity : Activity() {
 
     private fun checkInstallationResult(resultCode: Int) {
         val downloadId = intent.extras!!.getLong(ExtensionInstaller.EXTRA_DOWNLOAD_ID)
+        val extensionManager = Injekt.get<ExtensionManager>()
         val newStep = when (resultCode) {
             RESULT_OK -> InstallStep.Installed
             RESULT_CANCELED -> InstallStep.Idle

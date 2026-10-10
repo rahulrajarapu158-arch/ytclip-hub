@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.network.parseAs
 import eu.kanade.tachiyomi.source.ConfigurableSource
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.sourcePreferences
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.addAll
 import kotlinx.serialization.json.buildJsonObject
@@ -24,18 +23,13 @@ import tachiyomi.domain.source.service.SourceManager
 import uy.kohesive.injekt.injectLazy
 import java.security.MessageDigest
 
-class SuwayomiApi(
-    private val trackerId: Long,
-    private val sourceManager: SourceManager,
-) {
+class SuwayomiApi(private val trackId: Long) {
 
     private val json: Json by injectLazy()
 
-    // Blocking is fine here: these are only touched from OkHttp and tracker threads.
-    private val source: HttpSource by lazy { runBlocking { sourceManager.get(sourceId) as HttpSource } }
-    private val configurableSource: ConfigurableSource by lazy {
-        runBlocking { sourceManager.get(sourceId) as ConfigurableSource }
-    }
+    private val sourceManager: SourceManager by injectLazy()
+    private val source: HttpSource by lazy { (sourceManager.get(sourceId) as HttpSource) }
+    private val configurableSource: ConfigurableSource by lazy { (sourceManager.get(sourceId) as ConfigurableSource) }
     private val client: OkHttpClient by lazy { source.client }
     private val baseUrl: String by lazy { source.baseUrl.trimEnd('/') }
     private val apiUrl: String by lazy { "$baseUrl/api/graphql" }
@@ -71,7 +65,7 @@ class SuwayomiApi(
                 .entry
         }
 
-        TrackSearch.create(trackerId).apply {
+        TrackSearch.create(trackId).apply {
             remote_id = mangaId
             title = manga.title
             cover_url = "$baseUrl/${manga.thumbnailUrl}"
@@ -152,13 +146,15 @@ class SuwayomiApi(
                 }
             }
         }
-        client.newCall(
-            POST(
-                apiUrl,
-                body = markPayload.toString().toRequestBody(jsonMime),
-            ),
-        )
-            .awaitSuccess()
+        with(json) {
+            client.newCall(
+                POST(
+                    apiUrl,
+                    body = markPayload.toString().toRequestBody(jsonMime),
+                ),
+            )
+                .awaitSuccess()
+        }
 
         val trackQuery = $$"""
         |mutation TrackManga($mangaId: Int!) {
@@ -173,13 +169,15 @@ class SuwayomiApi(
                 put("mangaId", mangaId)
             }
         }
-        client.newCall(
-            POST(
-                apiUrl,
-                body = trackPayload.toString().toRequestBody(jsonMime),
-            ),
-        )
-            .awaitSuccess()
+        with(json) {
+            client.newCall(
+                POST(
+                    apiUrl,
+                    body = trackPayload.toString().toRequestBody(jsonMime),
+                ),
+            )
+                .awaitSuccess()
+        }
 
         return getTrackSearch(track.remote_id)
     }

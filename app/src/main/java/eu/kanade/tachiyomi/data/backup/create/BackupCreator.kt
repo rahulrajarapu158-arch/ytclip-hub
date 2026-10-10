@@ -3,9 +3,6 @@ package eu.kanade.tachiyomi.data.backup.create
 import android.content.Context
 import android.net.Uri
 import com.hippo.unifile.UniFile
-import dev.zacsweers.metro.Assisted
-import dev.zacsweers.metro.AssistedFactory
-import dev.zacsweers.metro.AssistedInject
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.backup.BackupFileValidator
 import eu.kanade.tachiyomi.data.backup.create.creators.CategoriesBackupCreator
@@ -32,31 +29,29 @@ import tachiyomi.domain.manga.interactor.GetFavorites
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.repository.MangaRepository
 import tachiyomi.i18n.MR
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.time.Clock
 
-@AssistedInject
 class BackupCreator(
-    @Assisted private val isAutoBackup: Boolean,
     private val context: Context,
-    private val parser: ProtoBuf,
-    private val getFavorites: GetFavorites,
-    private val backupPreferences: BackupPreferences,
-    private val mangaRepository: MangaRepository,
-    private val categoriesBackupCreator: CategoriesBackupCreator,
-    private val mangaBackupCreator: MangaBackupCreator,
-    private val preferenceBackupCreator: PreferenceBackupCreator,
-    private val extensionStoresBackupCreator: ExtensionStoresBackupCreator,
-    private val sourcesBackupCreator: SourcesBackupCreator,
-    private val backupFileValidator: BackupFileValidator,
+    private val isAutoBackup: Boolean,
+
+    private val parser: ProtoBuf = Injekt.get(),
+    private val getFavorites: GetFavorites = Injekt.get(),
+    private val backupPreferences: BackupPreferences = Injekt.get(),
+    private val mangaRepository: MangaRepository = Injekt.get(),
+
+    private val categoriesBackupCreator: CategoriesBackupCreator = CategoriesBackupCreator(),
+    private val mangaBackupCreator: MangaBackupCreator = MangaBackupCreator(),
+    private val preferenceBackupCreator: PreferenceBackupCreator = PreferenceBackupCreator(),
+    private val extensionStoresBackupCreator: ExtensionStoresBackupCreator = ExtensionStoresBackupCreator(),
+    private val sourcesBackupCreator: SourcesBackupCreator = SourcesBackupCreator(),
 ) {
-    @AssistedFactory
-    fun interface Factory {
-        fun create(isAutoBackup: Boolean): BackupCreator
-    }
 
     suspend fun backup(uri: Uri, options: BackupOptions): String {
         var file: UniFile? = null
@@ -110,7 +105,7 @@ class BackupCreator(
             val fileUri = file.uri
 
             // Make sure it's a valid backup file
-            backupFileValidator.validate(fileUri)
+            BackupFileValidator(context).validate(fileUri)
 
             if (isAutoBackup) {
                 backupPreferences.lastAutoBackupTimestamp.set(Clock.System.now().toEpochMilliseconds())
@@ -136,7 +131,7 @@ class BackupCreator(
         return mangaBackupCreator(mangas, options)
     }
 
-    private suspend fun backupSources(mangas: List<BackupManga>): List<BackupSource> {
+    private fun backupSources(mangas: List<BackupManga>): List<BackupSource> {
         return sourcesBackupCreator(mangas)
     }
 
@@ -152,7 +147,7 @@ class BackupCreator(
         return extensionStoresBackupCreator()
     }
 
-    private suspend fun backupSourcePreferences(options: BackupOptions): List<BackupSourcePreferences> {
+    private fun backupSourcePreferences(options: BackupOptions): List<BackupSourcePreferences> {
         if (!options.sourceSettings) return emptyList()
 
         return preferenceBackupCreator.createSource(includePrivatePreferences = options.privateSettings)

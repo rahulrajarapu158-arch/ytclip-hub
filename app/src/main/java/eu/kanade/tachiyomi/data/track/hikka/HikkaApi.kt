@@ -14,7 +14,6 @@ import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.HttpException
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.PUT
-import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.awaitSuccess
 import eu.kanade.tachiyomi.network.jsonMime
 import eu.kanade.tachiyomi.network.parseAs
@@ -32,7 +31,7 @@ import uy.kohesive.injekt.injectLazy
 import tachiyomi.domain.track.model.Track as DomainTrack
 
 class HikkaApi(
-    private val trackerId: Long,
+    private val trackId: Long,
     private val client: OkHttpClient,
     interceptor: HikkaInterceptor,
 ) {
@@ -95,26 +94,7 @@ class HikkaApi(
                     .awaitSuccess()
                     .parseAs<HKMangaPagination>()
                     .list
-                    .map { it.toTrack(trackerId) }
-            }
-        }
-    }
-
-    suspend fun getMangaDetails(slug: String): TrackSearch? {
-        return withIOContext {
-            val url = "$BASE_API_URL/manga/$slug"
-
-            with(json) {
-                val response = authClient.newCall(GET(url))
-                    .await()
-
-                if (response.code == 404) {
-                    null
-                } else {
-                    response
-                        .parseAs<HKManga>()
-                        .toTrack(trackerId)
-                }
+                    .map { it.toTrack(trackId) }
             }
         }
     }
@@ -149,7 +129,7 @@ class HikkaApi(
                 authClient.newCall(GET(url.toString()))
                     .awaitSuccess()
                     .parseAs<HKManga>()
-                    .toTrack(trackerId)
+                    .toTrack(trackId)
             }
         }
     }
@@ -193,7 +173,7 @@ class HikkaApi(
                 authClient.newCall(PUT(url.toString(), body = payload.toString().toRequestBody(jsonMime)))
                     .awaitSuccess()
                     .parseAs<HKRead>()
-                    .toTrack(trackerId)
+                    .toTrack(trackId)
             }
         }
     }

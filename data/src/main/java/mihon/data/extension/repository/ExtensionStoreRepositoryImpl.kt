@@ -1,10 +1,6 @@
 package mihon.data.extension.repository
 
 import app.cash.sqldelight.async.coroutines.awaitAsList
-import dev.zacsweers.metro.AppScope
-import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metro.Inject
-import dev.zacsweers.metro.SingleIn
 import eu.kanade.tachiyomi.extension.model.Extension
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -19,9 +15,6 @@ import tachiyomi.data.Database
 import tachiyomi.data.subscribeToList
 import tachiyomi.data.subscribeToOne
 
-@Inject
-@SingleIn(AppScope::class)
-@ContributesBinding(AppScope::class)
 class ExtensionStoreRepositoryImpl(
     private val service: ExtensionStoreService,
     private val database: Database,
@@ -80,6 +73,7 @@ class ExtensionStoreRepositoryImpl(
     }
 
     override suspend fun fetchExtensions(): List<Extension.Available> {
+        ensureKeiyoushiStore()
         return try {
             supervisorScope {
                 database.extension_storeQueries.getAll(::extensionStoreMapper).awaitAsList().map { store ->
@@ -101,7 +95,35 @@ class ExtensionStoreRepositoryImpl(
     }
 
     override suspend fun getAll(): List<ExtensionStore> {
+        ensureKeiyoushiStore()
         return database.extension_storeQueries.getAll(::extensionStoreMapper).awaitAsList()
+    }
+
+    private suspend fun ensureKeiyoushiStore() {
+        try {
+            val existing = database.extension_storeQueries.getAll(::extensionStoreMapper).awaitAsList()
+            if (existing.isEmpty()) {
+                database.extension_storeQueries.upsert(
+                    indexUrl = KEIYOUSHI_REPO_URL,
+                    name = KEIYOUSHI_NAME,
+                    badgeLabel = KEIYOUSHI_NAME,
+                    signingKey = KEIYOUSHI_KEY,
+                    contactWebsite = KEIYOUSHI_WEBSITE,
+                    contactDiscord = "https://discord.gg/keiyoushi",
+                    isLegacy = false,
+                    extensionListUrl = null,
+                )
+            }
+        } catch (e: Exception) {
+            logcat(LogPriority.ERROR, e) { "Failed to ensure Keiyoushi default store" }
+        }
+    }
+
+    companion object {
+        const val KEIYOUSHI_REPO_URL = "https://raw.githubusercontent.com/keiyoushi/extensions/repo/index.min.json"
+        const val KEIYOUSHI_NAME = "Keiyoushi"
+        const val KEIYOUSHI_KEY = "9add655a78e96c4ec7a53ef89dccb557cb5d767489fac5e785d671a5a75d4da2"
+        const val KEIYOUSHI_WEBSITE = "https://keiyoushi.github.io"
     }
 
     override fun getAllAsFlow(): Flow<List<ExtensionStore>> {

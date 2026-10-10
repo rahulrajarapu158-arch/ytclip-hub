@@ -1,9 +1,7 @@
 package eu.kanade.domain.source.interactor
 
-import dev.zacsweers.metro.Inject
 import eu.kanade.domain.source.service.SourcePreferences
 
-@Inject
 class SetMigrateSorting(
     private val preferences: SourcePreferences,
 ) {

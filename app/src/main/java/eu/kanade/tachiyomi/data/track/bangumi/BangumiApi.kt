@@ -6,7 +6,6 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.bangumi.dto.BGMCollectionResponse
 import eu.kanade.tachiyomi.data.track.bangumi.dto.BGMOAuth
 import eu.kanade.tachiyomi.data.track.bangumi.dto.BGMSearchResult
-import eu.kanade.tachiyomi.data.track.bangumi.dto.BGMSubject
 import eu.kanade.tachiyomi.data.track.bangumi.dto.BGMUser
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.GET
@@ -30,7 +29,7 @@ import tachiyomi.core.common.util.lang.withIOContext
 import uy.kohesive.injekt.injectLazy
 
 class BangumiApi(
-    private val trackerId: Long,
+    private val trackId: Long,
     private val client: OkHttpClient,
     interceptor: BangumiInterceptor,
 ) {
@@ -106,21 +105,7 @@ class BangumiApi(
                     .parseAs<BGMSearchResult>()
                     .data
                     .filter { it.platform == null || it.platform == "漫画" }
-                    .map { it.toTrackSearch(trackerId) }
-            }
-        }
-    }
-
-    suspend fun getMangaDetails(id: Int): TrackSearch? {
-        return withIOContext {
-            val url = "$API_URL/v0/subjects/$id"
-
-            with(json) {
-                authClient.newCall(GET(url, headers = headersOf("Content-Type", APP_JSON)))
-                    .awaitSuccess()
-                    .parseAs<BGMSubject>()
-                    .takeIf { it.platform == null || it.platform == "漫画" }
-                    ?.toTrackSearch(trackerId)
+                    .map { it.toTrackSearch(trackId) }
             }
         }
     }

@@ -1,6 +1,5 @@
 package mihon.domain.migration.usecases
 
-import dev.zacsweers.metro.Inject
 import eu.kanade.domain.manga.interactor.UpdateManga
 import eu.kanade.domain.manga.model.hasCustomCover
 import eu.kanade.domain.source.service.SourcePreferences
@@ -23,7 +22,6 @@ import tachiyomi.domain.track.interactor.GetTracks
 import tachiyomi.domain.track.interactor.InsertTrack
 import kotlin.time.Clock
 
-@Inject
 class MigrateMangaUseCase(
     private val sourcePreferences: SourcePreferences,
     private val trackerManager: TrackerManager,

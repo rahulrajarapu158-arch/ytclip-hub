@@ -112,7 +112,7 @@ class MyAnimeList(id: Long) : BaseTracker(id, "MyAnimeList"), DeletableTracker {
 
     override suspend fun search(query: String): List<TrackSearch> {
         if (query.startsWith(SEARCH_ID_PREFIX)) {
-            query.substringAfter(SEARCH_ID_PREFIX).trim().toIntOrNull()?.let { id ->
+            query.substringAfter(SEARCH_ID_PREFIX).toIntOrNull()?.let { id ->
                 return listOf(api.getMangaDetails(id))
             }
         }
@@ -139,7 +139,7 @@ class MyAnimeList(id: Long) : BaseTracker(id, "MyAnimeList"), DeletableTracker {
             val username = api.getCurrentUser()
             saveDisplayUsername(username)
             saveCredentials(username, oauth.accessToken)
-        } catch (_: Throwable) {
+        } catch (e: Throwable) {
             logout()
         }
     }
@@ -165,7 +165,7 @@ class MyAnimeList(id: Long) : BaseTracker(id, "MyAnimeList"), DeletableTracker {
     fun loadOAuth(): MALOAuth? {
         return try {
             json.decodeFromString<MALOAuth>(trackPreferences.trackToken(this).get())
-        } catch (_: Exception) {
+        } catch (e: Exception) {
             null
         }
     }

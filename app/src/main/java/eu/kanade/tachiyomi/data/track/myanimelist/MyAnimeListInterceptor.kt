@@ -72,7 +72,10 @@ class MyAnimeListInterceptor(private val myanimelist: MyAnimeList) : Interceptor
             }
         }
             .getOrNull()
-            ?.also { setAuth(it) }
+            ?.also {
+                this.oauth = it
+                myanimelist.saveOAuth(it)
+            }
             ?: throw MALTokenRefreshFailed()
     }
 }

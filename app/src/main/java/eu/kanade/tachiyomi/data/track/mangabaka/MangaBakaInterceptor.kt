@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.data.track.mangabaka
 
 import eu.kanade.tachiyomi.data.track.mangabaka.dto.MangaBakaOAuth
-import eu.kanade.tachiyomi.network.parseAs
 import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
 import okhttp3.Response
@@ -21,9 +20,7 @@ class MangaBakaInterceptor(private val mangaBaka: MangaBaka) : Interceptor {
         if (currentAuth.isExpired()) {
             val response = chain.proceed(MangaBakaApi.refreshTokenRequest(currentAuth.refreshToken))
             if (response.isSuccessful) {
-                currentAuth = with(json) {
-                    response.parseAs<MangaBakaOAuth>()
-                }
+                currentAuth = json.decodeFromString(response.body.string())
                 setAuth(currentAuth)
             } else {
                 response.close()

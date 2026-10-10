@@ -14,7 +14,6 @@ import eu.kanade.tachiyomi.network.DELETE
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.PUT
-import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.awaitSuccess
 import eu.kanade.tachiyomi.network.parseAs
 import kotlinx.serialization.json.Json
@@ -27,13 +26,12 @@ import kotlinx.serialization.json.putJsonObject
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
-import tachiyomi.core.common.util.lang.withIOContext
 import uy.kohesive.injekt.injectLazy
 import tachiyomi.domain.track.model.Track as DomainTrack
 
 class MangaUpdatesApi(
-    private val client: OkHttpClient,
     interceptor: MangaUpdatesInterceptor,
+    private val client: OkHttpClient,
 ) {
     private val json: Json by injectLazy()
 
@@ -123,7 +121,7 @@ class MangaUpdatesApi(
                     .awaitSuccess()
                     .parseAs<MURating>()
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
             null
         }
     }
@@ -172,23 +170,6 @@ class MangaUpdatesApi(
                 .parseAs<MUSearchResult>()
                 .results
                 .map { it.record }
-        }
-    }
-
-    suspend fun getSeriesDetails(id: Long): MURecord? {
-        return withIOContext {
-            val url = "$BASE_URL/v1/series/$id"
-
-            with(json) {
-                val response = client.newCall(GET(url))
-                    .await()
-
-                if (response.code == 404) {
-                    null
-                } else {
-                    response.parseAs<MURecord>()
-                }
-            }
         }
     }
 

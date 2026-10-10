@@ -27,7 +27,7 @@ data class BGMSubject(
     val rating: BGMSubjectRating?,
     val platform: String?,
 ) {
-    fun toTrackSearch(trackerId: Long): TrackSearch = TrackSearch.create(trackerId).apply {
+    fun toTrackSearch(trackId: Long): TrackSearch = TrackSearch.create(trackId).apply {
         remote_id = this@BGMSubject.id
         title = nameCn.ifBlank { name }
         cover_url = images?.common.orEmpty()

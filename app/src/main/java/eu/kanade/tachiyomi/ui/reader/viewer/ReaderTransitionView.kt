@@ -14,7 +14,6 @@ import androidx.compose.ui.platform.AbstractComposeView
 import eu.kanade.presentation.reader.ChapterTransition
 import eu.kanade.presentation.theme.TachiyomiTheme
 import eu.kanade.tachiyomi.data.download.DownloadManager
-import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.source.local.isLocal
@@ -28,19 +27,20 @@ class ReaderTransitionView @JvmOverloads constructor(context: Context, attrs: At
         layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
     }
 
-    fun bind(transition: ChapterTransition, downloadManager: DownloadManager, manga: Manga?, source: Source?) {
-        data = if (manga != null && source != null) {
+    fun bind(transition: ChapterTransition, downloadManager: DownloadManager, manga: Manga?) {
+        data = if (manga != null) {
             Data(
                 transition = transition,
                 currChapterDownloaded = transition.from.pageLoader?.isLocal == true,
                 goingToChapterDownloaded = manga.isLocal() ||
                     transition.to?.chapter?.let { goingToChapter ->
-                        downloadManager.isChapterDownloadedOnDisk(
+                        downloadManager.isChapterDownloaded(
                             chapterName = goingToChapter.name,
                             chapterScanlator = goingToChapter.scanlator,
                             chapterUrl = goingToChapter.url,
                             mangaTitle = manga.title,
-                            source = source,
+                            sourceId = manga.source,
+                            skipCache = true,
                         )
                     } ?: false,
             )

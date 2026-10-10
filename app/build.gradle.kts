@@ -1,3 +1,4 @@
+import mihon.gradle.Config
 import mihon.gradle.getBuildTime
 import mihon.gradle.getLatestCommitCount
 import mihon.gradle.getLatestCommitSha
@@ -9,11 +10,18 @@ import kotlin.io.encoding.Base64
 plugins {
     alias(mihonx.plugins.android.application)
     alias(mihonx.plugins.compose)
+    alias(mihonx.plugins.spotless)
 
-    alias(libs.plugins.metro)
     alias(libs.plugins.aboutLibraries)
     alias(libs.plugins.androidx.baselineProfile)
     alias(libs.plugins.kotlin.serialization)
+}
+
+if (Config.includeTelemetry) {
+    pluginManager.apply {
+        apply(libs.plugins.google.services.get().pluginId)
+        apply(libs.plugins.firebase.crashlytics.get().pluginId)
+    }
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -24,13 +32,14 @@ android {
     defaultConfig {
         applicationId = "in.rahul.ytclip.hub"
 
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 29
+        versionName = "0.20.4"
 
         buildConfigField("String", "COMMIT_COUNT", "\"${getLatestCommitCount()}\"")
         buildConfigField("String", "COMMIT_SHA", "\"${getLatestCommitSha()}\"")
         buildConfigField("String", "BUILD_TIME", "\"${getBuildTime(useLatestCommitTime = false)}\"")
-        buildConfigField("boolean", "UPDATER_ENABLED", "false")
+        buildConfigField("boolean", "TELEMETRY_INCLUDED", "${Config.includeTelemetry}")
+        buildConfigField("boolean", "UPDATER_ENABLED", "${Config.enableUpdater}")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -64,7 +73,6 @@ android {
 
     buildTypes {
         val debug = getByName("debug") {
-            applicationIdSuffix = ".dev"
             versionNameSuffix = "-${getLatestCommitCount()}"
             isPseudoLocalesEnabled = true
         }
@@ -90,7 +98,7 @@ android {
 
             matchingFallbacks.addAll(commonMatchingFallbacks)
         }
-        create("nightly") {
+        create("preview") {
             initWith(release)
 
             applicationIdSuffix = ".debug"
@@ -112,7 +120,7 @@ android {
     }
 
     sourceSets {
-        getByName("nightly").res.directories.add("src/debug/res")
+        getByName("preview").res.directories.add("src/debug/res")
         getByName("benchmark").res.directories.add("src/debug/res")
     }
 
@@ -154,8 +162,8 @@ android {
     }
 
     dependenciesInfo {
-        includeInApk = false
-        includeInBundle = false
+        includeInApk = Config.includeDependencyInfo
+        includeInBundle = Config.includeDependencyInfo
     }
 
     buildFeatures {
@@ -198,11 +206,9 @@ dependencies {
     baselineProfile(projects.baselineProfile)
 
     implementation(projects.i18n)
-    implementation(projects.icons.materialSymbols)
-    implementation(projects.icons.simpleIcons)
     implementation(projects.core.archive)
     implementation(projects.core.common)
-    implementation(projects.core.metro)
+    implementation(projects.core.viewmodel)
     implementation(projects.coreMetadata)
     implementation(projects.sourceApi)
     implementation(projects.sourceLocal)
@@ -210,11 +216,13 @@ dependencies {
     implementation(projects.domain)
     implementation(projects.presentationCore)
     implementation(projects.presentationWidget)
+    implementation(projects.telemetry)
 
     // Compose
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.materialIcons)
     implementation(libs.androidx.compose.animation)
     implementation(libs.androidx.compose.animationGraphics)
     debugImplementation(libs.androidx.compose.uiTooling)
@@ -275,9 +283,6 @@ dependencies {
 
     // Dependency injection
     implementation(libs.injekt)
-    implementation(libs.metro.runtime)
-    implementation(libs.metrox.viewmodel)
-    implementation(libs.metrox.viewmodel.compose)
 
     // Image loading
     implementation(libs.bundles.coil)
@@ -285,8 +290,6 @@ dependencies {
         exclude(module = "image-decoder")
     }
     implementation(libs.image.decoder)
-
-    implementation(libs.webgpuviewer)
 
     // UI libraries
     implementation(libs.material)

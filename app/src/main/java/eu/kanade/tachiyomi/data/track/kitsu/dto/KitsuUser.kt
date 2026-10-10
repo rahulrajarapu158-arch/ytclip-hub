@@ -3,23 +3,17 @@ package eu.kanade.tachiyomi.data.track.kitsu.dto
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class KitsuCurrentAccountResult(
-    val data: KitsuCurrentAccountData,
+data class KitsuCurrentUserResult(
+    val data: List<KitsuUser>,
 )
 
 @Serializable
-data class KitsuCurrentAccountData(
-    val currentAccount: KitsuAccount,
-)
-
-@Serializable
-data class KitsuAccount(
+data class KitsuUser(
     val id: String,
-    val ratingSystem: String,
-    val profile: KitsuProfile,
+    val attributes: KitsuUserAttributes,
 )
 
 @Serializable
-data class KitsuProfile(
+data class KitsuUserAttributes(
     val name: String,
 )

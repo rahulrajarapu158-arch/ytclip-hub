@@ -14,7 +14,6 @@ import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.request.transformations
 import coil3.transform.CircleCropTransformation
-import dev.zacsweers.metro.Inject
 import eu.kanade.presentation.util.formatChapterNumber
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.core.security.SecurityPreferences
@@ -38,14 +37,15 @@ import tachiyomi.domain.library.model.LibraryManga
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.i18n.MR
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import java.math.RoundingMode
 import java.text.NumberFormat
 
-@Inject
 class LibraryUpdateNotifier(
     private val context: Context,
-    private val securityPreferences: SecurityPreferences,
-    private val sourceManager: SourceManager,
+    private val securityPreferences: SecurityPreferences = Injekt.get(),
+    private val sourceManager: SourceManager = Injekt.get(),
 ) {
 
     private val percentFormatter = NumberFormat.getPercentInstance().apply {
@@ -113,10 +113,10 @@ class LibraryUpdateNotifier(
     /**
      * Warn when excessively checking any single source.
      */
-    suspend fun showQueueSizeWarningNotificationIfNeeded(mangaToUpdate: List<LibraryManga>) {
+    fun showQueueSizeWarningNotificationIfNeeded(mangaToUpdate: List<LibraryManga>) {
         val maxUpdatesFromSource = mangaToUpdate
             .groupBy { it.manga.source }
-            .filter { (sourceId, _) -> sourceManager.get(sourceId) !is UnmeteredSource }
+            .filterKeys { sourceManager.get(it) !is UnmeteredSource }
             .maxOfOrNull { it.value.size } ?: 0
 
         if (maxUpdatesFromSource <= MANGA_PER_SOURCE_QUEUE_WARNING_THRESHOLD) {

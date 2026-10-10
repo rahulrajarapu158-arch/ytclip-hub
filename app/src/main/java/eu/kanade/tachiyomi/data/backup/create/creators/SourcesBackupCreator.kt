@@ -1,21 +1,24 @@
 package eu.kanade.tachiyomi.data.backup.create.creators
 
-import dev.zacsweers.metro.Inject
 import eu.kanade.tachiyomi.data.backup.models.BackupManga
 import eu.kanade.tachiyomi.data.backup.models.BackupSource
 import eu.kanade.tachiyomi.source.Source
 import tachiyomi.domain.source.service.SourceManager
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
-@Inject
 class SourcesBackupCreator(
-    private val sourceManager: SourceManager,
+    private val sourceManager: SourceManager = Injekt.get(),
 ) {
 
-    suspend operator fun invoke(mangas: List<BackupManga>): List<BackupSource> {
+    operator fun invoke(mangas: List<BackupManga>): List<BackupSource> {
         return mangas
+            .asSequence()
             .map(BackupManga::source)
             .distinct()
-            .map { sourceManager.getOrStub(it).toBackupSource() }
+            .map(sourceManager::getOrStub)
+            .map { it.toBackupSource() }
+            .toList()
     }
 }
 

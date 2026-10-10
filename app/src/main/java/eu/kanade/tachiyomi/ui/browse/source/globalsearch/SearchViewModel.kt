@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.browse.source.globalsearch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.produceState
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import eu.kanade.domain.source.service.SourcePreferences
 import eu.kanade.tachiyomi.extension.ExtensionManager
@@ -12,14 +11,13 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import mihon.core.viewmodel.StateViewModel
 import mihon.domain.manga.model.toDomainManga
 import tachiyomi.core.common.preference.toggle
 import tachiyomi.core.common.util.lang.launchIO
@@ -27,26 +25,19 @@ import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.interactor.NetworkToLocalManga
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.service.SourceManager
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import java.util.concurrent.Executors
 
 abstract class SearchViewModel(
     initialState: State = State(),
-    sourcePreferences: SourcePreferences,
-    private val sourceManager: SourceManager,
-    private val extensionManager: ExtensionManager,
-    private val networkToLocalManga: NetworkToLocalManga,
-    private val getManga: GetManga,
-    private val preferences: SourcePreferences,
-) : ViewModel() {
-
-    val state: StateFlow<State>
-        field = MutableStateFlow<State>(initialState)
-
-    // Subclasses can't touch the backing field (Kotlin forbids a visibility modifier on one),
-    // so state writes from them go through here.
-    protected fun updateState(function: (State) -> State) {
-        state.update(function)
-    }
+    sourcePreferences: SourcePreferences = Injekt.get(),
+    private val sourceManager: SourceManager = Injekt.get(),
+    private val extensionManager: ExtensionManager = Injekt.get(),
+    private val networkToLocalManga: NetworkToLocalManga = Injekt.get(),
+    private val getManga: GetManga = Injekt.get(),
+    private val preferences: SourcePreferences = Injekt.get(),
+) : StateViewModel<SearchViewModel.State>(initialState) {
 
     private val coroutineDispatcher = Executors.newFixedThreadPool(5).asCoroutineDispatcher()
     private var searchJob: Job? = null
@@ -70,8 +61,8 @@ abstract class SearchViewModel(
 
     init {
         viewModelScope.launch {
-            preferences.globalSearchFilterState.changes().collectLatest { onlyShowHasResults ->
-                state.update { it.copy(onlyShowHasResults = onlyShowHasResults) }
+            preferences.globalSearchFilterState.changes().collectLatest { state ->
+                mutableState.update { it.copy(onlyShowHasResults = state) }
             }
         }
     }
@@ -87,7 +78,7 @@ abstract class SearchViewModel(
         }
     }
 
-    open suspend fun getEnabledSources(): List<Source> {
+    open fun getEnabledSources(): List<Source> {
         return sourceManager.getAll()
             .filter { it.lang in enabledLanguages && "${it.id}" !in disabledSources }
             .sortedWith(
@@ -98,7 +89,7 @@ abstract class SearchViewModel(
             )
     }
 
-    private suspend fun getSelectedSources(): List<Source> {
+    private fun getSelectedSources(): List<Source> {
         val enabledSources = getEnabledSources()
 
         val filter = extensionFilter
@@ -106,18 +97,18 @@ abstract class SearchViewModel(
             return enabledSources
         }
 
-        return extensionManager.getLoadedExtensions()
+        return extensionManager.installedExtensionsFlow.value
             .filter { it.pkgName == filter }
             .flatMap { it.sources }
             .filter { it in enabledSources }
     }
 
     fun updateSearchQuery(query: String?) {
-        state.update { it.copy(searchQuery = query) }
+        mutableState.update { it.copy(searchQuery = query) }
     }
 
     fun setSourceFilter(filter: SourceFilter) {
-        state.update { it.copy(sourceFilter = filter) }
+        mutableState.update { it.copy(sourceFilter = filter) }
         search()
     }
 
@@ -139,23 +130,23 @@ abstract class SearchViewModel(
 
         searchJob?.cancel()
 
+        val sources = getSelectedSources()
+
+        // Reuse previous results if possible
+        if (sameQuery) {
+            val existingResults = state.value.items
+            updateItems(
+                sources
+                    .associateWith { existingResults[it] ?: SearchItemResult.Loading },
+            )
+        } else {
+            updateItems(
+                sources
+                    .associateWith { SearchItemResult.Loading },
+            )
+        }
+
         searchJob = viewModelScope.launchIO {
-            val sources = getSelectedSources()
-
-            // Reuse previous results if possible
-            if (sameQuery) {
-                val existingResults = state.value.items
-                updateItems(
-                    sources
-                        .associateWith { existingResults[it] ?: SearchItemResult.Loading },
-                )
-            } else {
-                updateItems(
-                    sources
-                        .associateWith { SearchItemResult.Loading },
-                )
-            }
-
             sources.map { source ->
                 async {
                     if (state.value.items[source] !is SearchItemResult.Loading) {
@@ -187,7 +178,7 @@ abstract class SearchViewModel(
     }
 
     private fun updateItems(items: Map<Source, SearchItemResult>) {
-        state.update {
+        mutableState.update {
             it.copy(
                 items = items
                     .toSortedMap(sortComparator(items)),
@@ -202,12 +193,12 @@ abstract class SearchViewModel(
     fun setMigrateDialog(currentId: Long, target: Manga) {
         viewModelScope.launchIO {
             val current = getManga.await(currentId) ?: return@launchIO
-            state.update { it.copy(dialog = Dialog.Migrate(target, current)) }
+            mutableState.update { it.copy(dialog = Dialog.Migrate(target, current)) }
         }
     }
 
     fun clearDialog() {
-        state.update { it.copy(dialog = null) }
+        mutableState.update { it.copy(dialog = null) }
     }
 
     @Immutable

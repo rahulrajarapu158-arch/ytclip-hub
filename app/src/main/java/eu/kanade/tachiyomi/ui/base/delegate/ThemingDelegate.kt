@@ -1,9 +1,11 @@
 package eu.kanade.tachiyomi.ui.base.delegate
 
 import android.app.Activity
+import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.domain.ui.model.AppTheme
 import eu.kanade.tachiyomi.R
-import mihon.app.di.appGraph
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 interface ThemingDelegate {
     fun applyAppTheme(activity: Activity)
@@ -20,7 +22,7 @@ interface ThemingDelegate {
 
 class ThemingDelegateImpl : ThemingDelegate {
     override fun applyAppTheme(activity: Activity) {
-        val uiPreferences = activity.appGraph.uiPreferences
+        val uiPreferences = Injekt.get<UiPreferences>()
         ThemingDelegate.getThemeResIds(uiPreferences.appTheme.get(), uiPreferences.themeDarkAmoled.get())
             .forEach(activity::setTheme)
     }

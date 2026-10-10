@@ -11,7 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -31,39 +30,36 @@ import androidx.preference.forEach
 import androidx.preference.getOnBindEditTextListener
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import eu.kanade.core.util.ifSourcesLoaded
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.util.Screen
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.SharedPreferencesDataStore
 import eu.kanade.tachiyomi.source.ConfigurableSource
-import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.sourcePreferences
 import eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText.Companion.setIncognito
-import kotlinx.coroutines.launch
-import mihon.app.di.appGraph
+import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.screens.LoadingScreen
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 class SourcePreferencesScreen(val sourceId: Long) : Screen() {
 
     @Composable
     override fun Content() {
-        val context = LocalContext.current
-        val navigator = LocalNavigator.currentOrThrow
-
-        val source by produceState<Source?>(initialValue = null) {
-            value = context.appGraph.sourceManager.getOrStub(sourceId)
-        }
-
-        if (source == null) {
+        if (!ifSourcesLoaded()) {
             LoadingScreen()
             return
         }
 
+        val context = LocalContext.current
+        val navigator = LocalNavigator.currentOrThrow
+
         Scaffold(
             topBar = {
                 AppBar(
-                    title = source.toString(),
+                    title = Injekt.get<SourceManager>().getOrStub(sourceId).toString(),
                     navigateUp = navigator::pop,
                     scrollBehavior = it,
                 )
@@ -131,17 +127,12 @@ class SourcePreferencesFragment : PreferenceFragmentCompat() {
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        preferenceScreen = preferenceManager.createPreferenceScreen(requireContext())
-        lifecycleScope.launch {
-            preferenceScreen = populateScreen()
-        }
+        preferenceScreen = populateScreen()
     }
 
-    private suspend fun populateScreen(): PreferenceScreen {
+    private fun populateScreen(): PreferenceScreen {
         val sourceId = requireArguments().getLong(SOURCE_ID)
-        val appGraph = requireContext().appGraph
-        val source = appGraph.sourceManager.getOrStub(sourceId)
-        val basePreferences = appGraph.basePreferences
+        val source = Injekt.get<SourceManager>().getOrStub(sourceId)
         val sourceScreen = preferenceManager.createPreferenceScreen(requireContext())
 
         if (source is ConfigurableSource) {
@@ -161,7 +152,7 @@ class SourcePreferencesFragment : PreferenceFragmentCompat() {
                     val setListener = pref.getOnBindEditTextListener()
                     pref.setOnBindEditTextListener {
                         setListener?.onBindEditText(it)
-                        it.setIncognito(basePreferences, lifecycleScope)
+                        it.setIncognito(lifecycleScope)
                     }
                 }
             }

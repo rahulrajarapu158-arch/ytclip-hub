@@ -5,6 +5,8 @@ import coil3.request.Options
 import eu.kanade.domain.manga.model.hasCustomCover
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import tachiyomi.domain.manga.model.MangaCover
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import tachiyomi.domain.manga.model.Manga as DomainManga
 
 class MangaKeyer : Keyer<DomainManga> {
@@ -18,7 +20,7 @@ class MangaKeyer : Keyer<DomainManga> {
 }
 
 class MangaCoverKeyer(
-    private val coverCache: CoverCache,
+    private val coverCache: CoverCache = Injekt.get(),
 ) : Keyer<MangaCover> {
     override fun key(data: MangaCover, options: Options): String {
         return if (coverCache.getCustomCoverFile(data.mangaId).exists()) {

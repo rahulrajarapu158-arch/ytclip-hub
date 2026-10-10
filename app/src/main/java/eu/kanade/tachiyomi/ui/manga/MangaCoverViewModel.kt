@@ -3,19 +3,14 @@ package eu.kanade.tachiyomi.ui.manga
 import android.content.Context
 import android.net.Uri
 import androidx.compose.material3.SnackbarHostState
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import coil3.asDrawable
 import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.size.Size
-import dev.zacsweers.metro.AppScope
-import dev.zacsweers.metro.Assisted
-import dev.zacsweers.metro.AssistedFactory
-import dev.zacsweers.metro.AssistedInject
-import dev.zacsweers.metro.ContributesIntoMap
-import dev.zacsweers.metrox.viewmodel.ManualViewModelAssistedFactory
-import dev.zacsweers.metrox.viewmodel.ManualViewModelAssistedFactoryKey
 import eu.kanade.domain.manga.interactor.UpdateManga
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.saver.Image
@@ -24,14 +19,10 @@ import eu.kanade.tachiyomi.data.saver.Location
 import eu.kanade.tachiyomi.util.editCover
 import eu.kanade.tachiyomi.util.system.getBitmapOrNull
 import eu.kanade.tachiyomi.util.system.toShareIntent
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.WhileSubscribed
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import logcat.LogPriority
+import mihon.core.viewmodel.StateViewModel
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.util.lang.launchIO
 import tachiyomi.core.common.util.lang.withIOContext
@@ -40,30 +31,37 @@ import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.i18n.MR
-import tachiyomi.source.local.image.LocalCoverManager
-import kotlin.time.Duration.Companion.seconds
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
-@AssistedInject
 class MangaCoverViewModel(
-    @Assisted private val mangaId: Long,
-    private val getManga: GetManga,
-    private val imageSaver: ImageSaver,
-    private val coverCache: CoverCache,
-    private val updateManga: UpdateManga,
-    private val coverManager: LocalCoverManager,
-    val snackbarHostState: SnackbarHostState = SnackbarHostState(),
-) : ViewModel() {
+    private val mangaId: Long,
+    private val getManga: GetManga = Injekt.get(),
+    private val imageSaver: ImageSaver = Injekt.get(),
+    private val coverCache: CoverCache = Injekt.get(),
+    private val updateManga: UpdateManga = Injekt.get(),
 
-    @AssistedFactory
-    @ManualViewModelAssistedFactoryKey
-    @ContributesIntoMap(AppScope::class)
-    interface Factory : ManualViewModelAssistedFactory {
-        fun create(mangaId: Long): MangaCoverViewModel
+    val snackbarHostState: SnackbarHostState = SnackbarHostState(),
+) : StateViewModel<Manga?>(null) {
+
+    companion object {
+        val MANGA_ID_KEY = CreationExtras.Key<Long>()
+
+        val Factory = viewModelFactory {
+            initializer {
+                MangaCoverViewModel(
+                    mangaId = get(MANGA_ID_KEY)!!,
+                )
+            }
+        }
     }
 
-    val state: StateFlow<Manga?> = getManga.subscribe(mangaId)
-        .flowOn(Dispatchers.IO)
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), null)
+    init {
+        viewModelScope.launchIO {
+            getManga.subscribe(mangaId)
+                .collect { newManga -> mutableState.update { newManga } }
+        }
+    }
 
     fun saveCover(context: Context) {
         viewModelScope.launch {
@@ -139,7 +137,7 @@ class MangaCoverViewModel(
         viewModelScope.launchIO {
             context.contentResolver.openInputStream(data)?.use {
                 try {
-                    manga.editCover(coverManager, it, updateManga, coverCache)
+                    manga.editCover(Injekt.get(), it, updateManga, coverCache)
                     notifyCoverUpdated(context)
                 } catch (e: Exception) {
                     notifyFailedCoverUpdate(context, e)
@@ -149,6 +147,7 @@ class MangaCoverViewModel(
     }
 
     fun deleteCustomCover(context: Context) {
+        val mangaId = state.value?.id ?: return
         viewModelScope.launchIO {
             try {
                 coverCache.deleteCustomCover(mangaId)

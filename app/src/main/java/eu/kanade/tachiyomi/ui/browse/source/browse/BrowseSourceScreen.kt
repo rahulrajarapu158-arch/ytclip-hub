@@ -8,6 +8,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.FilterList
+import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -28,9 +32,11 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import dev.zacsweers.metrox.viewmodel.assistedMetroViewModel
+import eu.kanade.core.util.ifSourcesLoaded
 import eu.kanade.presentation.browse.BrowseSourceContent
 import eu.kanade.presentation.browse.MissingSourceScreen
 import eu.kanade.presentation.browse.components.BrowseSourceToolbar
@@ -49,10 +55,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import mihon.feature.migration.dialog.MigrateMangaDialog
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.FilterList
-import mihon.icons.materialsymbols.rounded.NewReleases
-import mihon.icons.materialsymbols.roundedfilled.Favorite
 import mihon.presentation.core.util.collectAsLazyPagingItems
 import tachiyomi.core.common.Constants
 import tachiyomi.core.common.util.lang.launchIO
@@ -75,10 +77,18 @@ data class BrowseSourceScreen(
 
     @Composable
     override fun Content() {
-        val viewModel =
-            assistedMetroViewModel<BrowseSourceViewModel, BrowseSourceViewModel.Factory> {
-                create(sourceId = sourceId, listingQuery = listingQuery)
-            }
+        if (!ifSourcesLoaded()) {
+            LoadingScreen()
+            return
+        }
+
+        val viewModel = viewModel<BrowseSourceViewModel>(
+            factory = BrowseSourceViewModel.Factory,
+            extras = CreationExtras {
+                set(BrowseSourceViewModel.SOURCE_ID_KEY, sourceId)
+                set(BrowseSourceViewModel.LISTING_QUERY_KEY, listingQuery)
+            },
+        )
         val state by viewModel.state.collectAsState()
 
         val navigator = LocalNavigator.currentOrThrow
@@ -89,15 +99,9 @@ data class BrowseSourceScreen(
             }
         }
 
-        val source = state.source
-        if (source == null) {
-            LoadingScreen()
-            return
-        }
-
-        if (source is StubSource) {
+        if (viewModel.source is StubSource) {
             MissingSourceScreen(
-                source = source,
+                source = viewModel.source,
                 navigateUp = navigateUp,
             )
             return
@@ -110,18 +114,18 @@ data class BrowseSourceScreen(
 
         val onHelpClick = { uriHandler.openUri(LocalSource.HELP_URL) }
         val onWebViewClick = f@{
-            val httpSource = source as? HttpSource ?: return@f
+            val source = viewModel.source as? HttpSource ?: return@f
             navigator.push(
                 WebViewScreen(
-                    url = httpSource.getHomeUrl(),
-                    initialTitle = httpSource.name,
-                    sourceId = httpSource.id,
+                    url = source.getHomeUrl(),
+                    initialTitle = source.name,
+                    sourceId = source.id,
                 ),
             )
         }
 
-        LaunchedEffect(source) {
-            assistUrl = (source as? HttpSource)?.getHomeUrl()
+        LaunchedEffect(viewModel.source) {
+            assistUrl = (viewModel.source as? HttpSource)?.getHomeUrl()
         }
 
         Scaffold(
@@ -134,7 +138,7 @@ data class BrowseSourceScreen(
                     BrowseSourceToolbar(
                         searchQuery = state.toolbarQuery,
                         onSearchQueryChange = viewModel::setToolbarQuery,
-                        source = source,
+                        source = viewModel.source,
                         displayMode = viewModel.displayMode,
                         onDisplayModeChange = { viewModel.displayMode = it },
                         navigateUp = navigateUp,
@@ -158,7 +162,7 @@ data class BrowseSourceScreen(
                             },
                             leadingIcon = {
                                 Icon(
-                                    imageVector = MaterialSymbols.RoundedFilled.Favorite,
+                                    imageVector = Icons.Outlined.Favorite,
                                     contentDescription = null,
                                     modifier = Modifier
                                         .size(FilterChipDefaults.IconSize),
@@ -168,7 +172,7 @@ data class BrowseSourceScreen(
                                 Text(text = stringResource(MR.strings.popular))
                             },
                         )
-                        if (source.supportsLatest) {
+                        if (viewModel.source.supportsLatest) {
                             FilterChip(
                                 selected = state.listing == Listing.Latest,
                                 onClick = {
@@ -177,7 +181,7 @@ data class BrowseSourceScreen(
                                 },
                                 leadingIcon = {
                                     Icon(
-                                        imageVector = MaterialSymbols.Rounded.NewReleases,
+                                        imageVector = Icons.Outlined.NewReleases,
                                         contentDescription = null,
                                         modifier = Modifier
                                             .size(FilterChipDefaults.IconSize),
@@ -194,7 +198,7 @@ data class BrowseSourceScreen(
                                 onClick = viewModel::openFilterSheet,
                                 leadingIcon = {
                                     Icon(
-                                        imageVector = MaterialSymbols.Rounded.FilterList,
+                                        imageVector = Icons.Outlined.FilterList,
                                         contentDescription = null,
                                         modifier = Modifier
                                             .size(FilterChipDefaults.IconSize),
@@ -213,7 +217,7 @@ data class BrowseSourceScreen(
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         ) { paddingValues ->
             BrowseSourceContent(
-                source = source,
+                source = viewModel.source,
                 mangaList = viewModel.mangaPagerFlowFlow.collectAsLazyPagingItems(),
                 columns = viewModel.getColumnsPreference(LocalConfiguration.current.orientation),
                 displayMode = viewModel.displayMode,

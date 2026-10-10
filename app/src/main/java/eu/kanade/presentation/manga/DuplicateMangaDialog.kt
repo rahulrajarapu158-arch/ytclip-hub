@@ -19,6 +19,18 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Brush
+import androidx.compose.material.icons.filled.PersonOutline
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.AttachMoney
+import androidx.compose.material.icons.outlined.Block
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Done
+import androidx.compose.material.icons.outlined.DoneAll
+import androidx.compose.material.icons.outlined.Pause
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -26,8 +38,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,22 +63,10 @@ import eu.kanade.presentation.more.settings.LocalPreferenceMinHeight
 import eu.kanade.presentation.more.settings.widget.TextPreferenceWidget
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.SManga
-import mihon.app.di.appGraph
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.Add
-import mihon.icons.materialsymbols.rounded.AttachMoney
-import mihon.icons.materialsymbols.rounded.Block
-import mihon.icons.materialsymbols.rounded.Brush
-import mihon.icons.materialsymbols.rounded.Close
-import mihon.icons.materialsymbols.rounded.Done
-import mihon.icons.materialsymbols.rounded.DoneAll
-import mihon.icons.materialsymbols.rounded.Pause
-import mihon.icons.materialsymbols.rounded.Person
-import mihon.icons.materialsymbols.rounded.Schedule
-import mihon.icons.materialsymbols.rounded.Warning
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.MangaWithChapterCount
 import tachiyomi.domain.source.model.StubSource
+import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.Badge
 import tachiyomi.presentation.core.components.BadgeGroup
@@ -76,6 +74,8 @@ import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.secondaryItemAlpha
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 @Composable
 fun DuplicateMangaDialog(
@@ -86,8 +86,7 @@ fun DuplicateMangaDialog(
     onMigrate: (manga: Manga) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-    val sourceManager = remember { context.appGraph.sourceManager }
+    val sourceManager = remember { Injekt.get<SourceManager>() }
     val minHeight = LocalPreferenceMinHeight.current
     val horizontalPadding = PaddingValues(horizontal = TabbedDialogPaddings.Horizontal)
     val horizontalPaddingModifier = Modifier.padding(horizontalPadding)
@@ -141,7 +140,7 @@ fun DuplicateMangaDialog(
 
                 TextPreferenceWidget(
                     title = stringResource(MR.strings.action_add_anyway),
-                    icon = MaterialSymbols.Rounded.Add,
+                    icon = Icons.Outlined.Add,
                     onPreferenceClick = {
                         onDismissRequest()
                         onConfirm()
@@ -172,12 +171,12 @@ fun DuplicateMangaDialog(
 @Composable
 private fun DuplicateMangaListItem(
     duplicate: MangaWithChapterCount,
-    getSource: suspend () -> Source,
+    getSource: () -> Source,
     onDismissRequest: () -> Unit,
     onOpenManga: () -> Unit,
     onMigrate: () -> Unit,
 ) {
-    val source by produceState<Source?>(initialValue = null) { value = getSource() }
+    val source = getSource()
     val manga = duplicate.manga
     Column(
         modifier = Modifier
@@ -230,7 +229,7 @@ private fun DuplicateMangaListItem(
         if (!manga.author.isNullOrBlank()) {
             MangaDetailRow(
                 text = manga.author!!,
-                iconImageVector = MaterialSymbols.Rounded.Person,
+                iconImageVector = Icons.Filled.PersonOutline,
                 maxLines = 2,
             )
         }
@@ -238,7 +237,7 @@ private fun DuplicateMangaListItem(
         if (!manga.artist.isNullOrBlank() && manga.author != manga.artist) {
             MangaDetailRow(
                 text = manga.artist!!,
-                iconImageVector = MaterialSymbols.Rounded.Brush,
+                iconImageVector = Icons.Filled.Brush,
                 maxLines = 2,
             )
         }
@@ -254,13 +253,13 @@ private fun DuplicateMangaListItem(
                 else -> stringResource(MR.strings.unknown)
             },
             iconImageVector = when (manga.status) {
-                SManga.ONGOING.toLong() -> MaterialSymbols.Rounded.Schedule
-                SManga.COMPLETED.toLong() -> MaterialSymbols.Rounded.DoneAll
-                SManga.LICENSED.toLong() -> MaterialSymbols.Rounded.AttachMoney
-                SManga.PUBLISHING_FINISHED.toLong() -> MaterialSymbols.Rounded.Done
-                SManga.CANCELLED.toLong() -> MaterialSymbols.Rounded.Close
-                SManga.ON_HIATUS.toLong() -> MaterialSymbols.Rounded.Pause
-                else -> MaterialSymbols.Rounded.Block
+                SManga.ONGOING.toLong() -> Icons.Outlined.Schedule
+                SManga.COMPLETED.toLong() -> Icons.Outlined.DoneAll
+                SManga.LICENSED.toLong() -> Icons.Outlined.AttachMoney
+                SManga.PUBLISHING_FINISHED.toLong() -> Icons.Outlined.Done
+                SManga.CANCELLED.toLong() -> Icons.Outlined.Close
+                SManga.ON_HIATUS.toLong() -> Icons.Outlined.Pause
+                else -> Icons.Outlined.Block
             },
         )
 
@@ -272,14 +271,14 @@ private fun DuplicateMangaListItem(
         ) {
             if (source is StubSource) {
                 Icon(
-                    imageVector = MaterialSymbols.Rounded.Warning,
+                    imageVector = Icons.Filled.Warning,
                     contentDescription = null,
                     modifier = Modifier.size(16.dp),
                     tint = MaterialTheme.colorScheme.error,
                 )
             }
             Text(
-                text = source?.name.orEmpty(),
+                text = source.name,
                 style = MaterialTheme.typography.labelSmall,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,

@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.reader.loader
 
 import android.content.Context
-import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.source.Source
@@ -25,7 +24,6 @@ class ChapterLoader(
     private val context: Context,
     private val downloadManager: DownloadManager,
     private val downloadProvider: DownloadProvider,
-    private val chapterCache: ChapterCache,
     private val manga: Manga,
     private val source: Source,
 ) {
@@ -79,12 +77,13 @@ class ChapterLoader(
      */
     private fun getPageLoader(chapter: ReaderChapter): PageLoader {
         val dbChapter = chapter.chapter
-        val isDownloaded = downloadManager.isChapterDownloadedOnDisk(
+        val isDownloaded = downloadManager.isChapterDownloaded(
             dbChapter.name,
             dbChapter.scanlator,
             dbChapter.url,
             manga.title,
-            source,
+            manga.source,
+            skipCache = true,
         )
         return when {
             isDownloaded -> DownloadPageLoader(
@@ -101,7 +100,7 @@ class ChapterLoader(
                     is Format.Epub -> EpubPageLoader(format.file.epubReader(context))
                 }
             }
-            source is HttpSource -> HttpPageLoader(chapter, source, chapterCache)
+            source is HttpSource -> HttpPageLoader(chapter, source)
             source is StubSource -> error(context.stringResource(MR.strings.source_not_installed, source.toString()))
             else -> error(context.stringResource(MR.strings.loader_not_implemented_error))
         }

@@ -28,8 +28,8 @@ data class SMManga(
     val kind: String?,
     val personRoles: List<SMPersonRole>?,
 ) {
-    fun toTrack(trackerId: Long): TrackSearch {
-        return TrackSearch.create(trackerId).apply {
+    fun toTrack(trackId: Long): TrackSearch {
+        return TrackSearch.create(trackId).apply {
             remote_id = this@SMManga.id
             title = name
             total_chapters = chapters

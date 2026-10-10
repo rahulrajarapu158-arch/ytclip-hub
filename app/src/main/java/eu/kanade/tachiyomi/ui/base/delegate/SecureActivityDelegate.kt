@@ -1,14 +1,12 @@
 package eu.kanade.tachiyomi.ui.base.delegate
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import dev.zacsweers.metro.Inject
 import eu.kanade.domain.base.BasePreferences
 import eu.kanade.tachiyomi.core.security.SecurityPreferences
 import eu.kanade.tachiyomi.ui.security.UnlockActivity
@@ -18,9 +16,9 @@ import eu.kanade.tachiyomi.util.view.setSecureScreen
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import mihon.app.di.appGraph
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 
 interface SecureActivityDelegate {
     fun registerSecureActivity(activity: AppCompatActivity)
@@ -33,8 +31,8 @@ interface SecureActivityDelegate {
          */
         var requireUnlock = true
 
-        fun onApplicationStopped(context: Context) {
-            val preferences = context.appGraph.securityPreferences
+        fun onApplicationStopped() {
+            val preferences = Injekt.get<SecurityPreferences>()
             if (!preferences.useAuthenticator.get()) return
 
             if (!AuthenticatorUtil.isAuthenticating) {
@@ -50,8 +48,8 @@ interface SecureActivityDelegate {
         /**
          * Checks if unlock is needed when app comes foreground.
          */
-        fun onApplicationStart(context: Context) {
-            val preferences = context.appGraph.securityPreferences
+        fun onApplicationStart() {
+            val preferences = Injekt.get<SecurityPreferences>()
             if (!preferences.useAuthenticator.get()) return
 
             val lastClosedPref = preferences.lastAppClosed
@@ -78,13 +76,11 @@ class SecureActivityDelegateImpl : SecureActivityDelegate, DefaultLifecycleObser
 
     private lateinit var activity: AppCompatActivity
 
-    @Inject private lateinit var preferences: BasePreferences
-
-    @Inject private lateinit var securityPreferences: SecurityPreferences
+    private val preferences: BasePreferences by injectLazy()
+    private val securityPreferences: SecurityPreferences by injectLazy()
 
     override fun registerSecureActivity(activity: AppCompatActivity) {
         this.activity = activity
-        Injekt.get<Context>().appGraph.inject(this)
         activity.lifecycle.addObserver(this)
     }
 

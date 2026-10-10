@@ -18,21 +18,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.util.fastForEach
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.core.screen.Screen
-import dev.zacsweers.metro.AppScope
-import dev.zacsweers.metro.ContributesIntoMap
-import dev.zacsweers.metro.Inject
-import dev.zacsweers.metro.binding
-import dev.zacsweers.metrox.viewmodel.ViewModelKey
-import dev.zacsweers.metrox.viewmodel.metroViewModel
 import eu.kanade.domain.manga.model.hasCustomCover
 import eu.kanade.domain.source.service.SourcePreferences
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.download.DownloadManager
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import mihon.core.viewmodel.StateViewModel
 import mihon.domain.migration.models.MigrationFlag
 import mihon.domain.migration.usecases.MigrateMangaUseCase
 import mihon.feature.common.utils.getLabel
@@ -44,6 +37,8 @@ import tachiyomi.presentation.core.components.LabeledCheckbox
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.LoadingScreen
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 @Composable
 internal fun Screen.MigrateMangaDialog(
@@ -55,7 +50,7 @@ internal fun Screen.MigrateMangaDialog(
 ) {
     val scope = rememberCoroutineScope()
 
-    val viewModel = metroViewModel<MigrateDialogViewModel>()
+    val viewModel = viewModel<MigrateDialogViewModel>()
     LaunchedEffect(current, target) {
         viewModel.init(current, target)
     }
@@ -128,18 +123,12 @@ internal fun Screen.MigrateMangaDialog(
     )
 }
 
-@Inject
-@ViewModelKey
-@ContributesIntoMap(AppScope::class, binding = binding<ViewModel>())
 class MigrateDialogViewModel(
-    private val sourcePreference: SourcePreferences,
-    private val coverCache: CoverCache,
-    private val downloadManager: DownloadManager,
-    private val migrateManga: MigrateMangaUseCase,
-) : ViewModel() {
-
-    val state: StateFlow<MigrateDialogViewModel.State>
-        field = MutableStateFlow<MigrateDialogViewModel.State>(State())
+    private val sourcePreference: SourcePreferences = Injekt.get(),
+    private val coverCache: CoverCache = Injekt.get(),
+    private val downloadManager: DownloadManager = Injekt.get(),
+    private val migrateManga: MigrateMangaUseCase = Injekt.get(),
+) : StateViewModel<MigrateDialogViewModel.State>(State()) {
 
     fun init(current: Manga, target: Manga) {
         val applicableFlags = buildList {
@@ -155,7 +144,7 @@ class MigrateDialogViewModel(
             }
         }
         val selectedFlags = sourcePreference.migrationFlags.get()
-        state.update {
+        mutableState.update {
             State(
                 current = current,
                 target = target,
@@ -166,7 +155,7 @@ class MigrateDialogViewModel(
     }
 
     fun toggleSelection(flag: MigrationFlag) {
-        state.update {
+        mutableState.update {
             val selectedFlags = it.selectedFlags.toMutableSet()
                 .apply { if (contains(flag)) remove(flag) else add(flag) }
                 .toSet()
@@ -175,13 +164,13 @@ class MigrateDialogViewModel(
     }
 
     suspend fun migrateManga(replace: Boolean) {
-        val currentState = state.value
-        val current = currentState.current ?: return
-        val target = currentState.target ?: return
-        sourcePreference.migrationFlags.set(currentState.selectedFlags)
-        state.update { it.copy(isMigrating = true) }
+        val state = state.value
+        val current = state.current ?: return
+        val target = state.target ?: return
+        sourcePreference.migrationFlags.set(state.selectedFlags)
+        mutableState.update { it.copy(isMigrating = true) }
         migrateManga(current, target, replace)
-        state.update { it.copy(isMigrating = false, isMigrated = true) }
+        mutableState.update { it.copy(isMigrating = false, isMigrated = true) }
     }
 
     data class State(

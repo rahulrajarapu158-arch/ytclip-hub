@@ -5,6 +5,10 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.outlined.ArrowDownward
+import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -30,10 +34,6 @@ import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.components.DropdownMenu
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
-import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.rounded.ArrowDownward
-import mihon.icons.materialsymbols.rounded.Error
-import mihon.icons.materialsymbols.roundedfilled.CheckCircle
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.IconButtonTokens
 import tachiyomi.presentation.core.i18n.stringResource
@@ -179,7 +179,7 @@ private fun DownloadingIndicator(
             )
         }
         Icon(
-            imageVector = MaterialSymbols.Rounded.ArrowDownward,
+            imageVector = Icons.Outlined.ArrowDownward,
             contentDescription = null,
             modifier = ArrowModifier,
             tint = arrowColor,
@@ -206,7 +206,7 @@ private fun DownloadedIndicator(
         contentAlignment = Alignment.Center,
     ) {
         Icon(
-            imageVector = MaterialSymbols.RoundedFilled.CheckCircle,
+            imageVector = Icons.Filled.CheckCircle,
             contentDescription = null,
             modifier = Modifier.size(IndicatorSize),
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -241,7 +241,7 @@ private fun ErrorIndicator(
         contentAlignment = Alignment.Center,
     ) {
         Icon(
-            imageVector = MaterialSymbols.Rounded.Error,
+            imageVector = Icons.Outlined.ErrorOutline,
             contentDescription = stringResource(MR.strings.chapter_error),
             modifier = Modifier.size(IndicatorSize),
             tint = MaterialTheme.colorScheme.error,
