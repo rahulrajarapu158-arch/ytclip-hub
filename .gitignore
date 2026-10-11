@@ -1,17 +1,44 @@
-# Build files
-.gradle
-.kotlin
-build
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
 
-# IDE files
-*.iml
-.idea/*
-!.idea/icon.svg
-/captures
-
-# Configuration files
-keystore.properties
-local.properties
-
-# macOS specific files
+# OS
 .DS_Store
+Thumbs.db
+
+# Gradle
+.gradle/
+build/
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Android
+*.apk
+*.aab
+*.dex
+*.class
+bin/
+gen/
+out/
+
+# Keystore
+*.jks
+*.keystore
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Local configuration
+local.properties
+secrets.properties
+
+# Built app
+app/build/
+**/build/
